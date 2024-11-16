@@ -7,11 +7,12 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydatabase
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./containers-data/postgres:/var/lib/postgresql/data
+      - ./dataset:/docker-entrypoint-initdb.d
 
   pgadmin:
     image: dpage/pgadmin4:latest
