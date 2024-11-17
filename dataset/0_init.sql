@@ -3,7 +3,7 @@ CREATE TABLE "addresses" (
     "street" varchar(30) NOT NULL,
     "locality" varchar(30) NOT NULL,
     "post_code" varchar(6) NOT NULL,
-    "buildingNum" varchar(4) NOT NULL
+    "building_num" varchar(4) NOT NULL
 );
 
 CREATE TABLE "providers" (
@@ -113,3 +113,11 @@ CREATE TABLE "orders_additions" (
     FOREIGN KEY("addition_id") REFERENCES "additions"("addition_id"),
     FOREIGN KEY("order_id") REFERENCES "orders"("order_id")
 );
+
+COPY dishes(dish_name, dish_type, price, description) FROM '/docker-entrypoint-initdb.d/data/dishes.csv' DELIMITER ';' CSV HEADER;
+COPY addresses(street, locality, post_code, building_num) FROM '/docker-entrypoint-initdb.d/data/addresses.csv' DELIMITER ';' CSV HEADER;
+COPY providers(prod_name, contact, address) FROM '/docker-entrypoint-initdb.d/data/providers.csv' DELIMITER ';' CSV HEADER;
+COPY components(component_name, price, availability) FROM '/docker-entrypoint-initdb.d/data/components.csv' DELIMITER ';' CSV HEADER;
+COPY additions(addition_name, provider, price, availability) FROM '/docker-entrypoint-initdb.d/data/additions.csv' DELIMITER ';' CSV HEADER;
+COPY dishes_components(dish_id, component_id, quantity) FROM '/docker-entrypoint-initdb.d/data/dishes_components.csv' DELIMITER ';' CSV HEADER;
+COPY dishes_additions(addition_id, dish_id) FROM '/docker-entrypoint-initdb.d/data/dishes_additions.csv' DELIMITER ';' CSV HEADER;
