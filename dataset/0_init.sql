@@ -39,6 +39,7 @@ CREATE TABLE "dishes" (
     "dish_name" varchar(20) NOT NULL,
     "dish_type" varchar(20) NOT NULL,
     "price" decimal(6,2) NOT NULL,
+    "is_served" boolean NOT NULL DEFAULT TRUE,
     "description" text
 );
 
