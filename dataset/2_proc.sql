@@ -17,12 +17,14 @@ DECLARE
     quantity int;
 	do_exists boolean;
 BEGIN
-    SELECT EXISTS(SELECT 1 FROM dishes WHERE dish_name = p_dish_name AND dish_type = p_dish_type) INTO do_exists;
+    SELECT item_exist(p_dish_name,'DISH') INTO do_exists;
+    -- SELECT EXISTS(SELECT 1 FROM dishes WHERE dish_name = p_dish_name AND dish_type = p_dish_type) INTO do_exists;
 
     IF do_exists THEN
-        RAISE NOTICE 'Dish "%s" of type "%s" already exists.', p_dish_name, p_dish_type;
+        RAISE NOTICE 'Dish "%" already exists.', p_dish_name;
         RETURN;
     END IF;
+
     -- Insert new dish into dishes table
     INSERT INTO dishes (dish_name, dish_type, price, description)
     VALUES (p_dish_name, p_dish_type, p_price, p_description)
@@ -118,5 +120,67 @@ BEGIN
 
     UPDATE dishes SET is_served = NOT current_status WHERE dish_name = p_dish_name AND dish_type = p_dish_type;
     RAISE NOTICE 'Dish "%" has been successfuly toggled, its current status: %', p_dish_name, NOT current_status;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE create_new_order (
+    p_payment_method_name varchar,
+    p_client_contact varchar,
+    p_note text,
+    p_address jsonb DEFAULT '[]'::jsonb,
+    p_dishes jsonb DEFAULT '[]'::jsonb,
+    p_additions jsonb DEFAULT '[]'::jsonb
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    current_payment_method int;
+    address_id int;
+    new_order_id int;
+    current_item varchar;
+    quantity int;
+    do_exists boolean;
+BEGIN
+    SELECT payment_method_id INTO current_payment_method FROM payment_methods WHERE p_payment_method_name = method;
+
+    IF current_payment_method IS NULL THEN
+        RAISE EXCEPTION 'Payment method "%" not found.', current_payment_method;
+    END IF;
+
+    SELECT new_address(p_address) INTO address_id;
+    INSERT INTO orders(payment_method, deliver, client_contact, address, note)
+    VALUES(current_payment_method, '12345678901', p_client_contact, address_id, p_note)
+    RETURNING order_id INTO new_order_id;
+
+    IF p_dishes IS NOT NULL AND jsonb_array_length(p_dishes) > 0 THEN
+        FOR i IN 0..(jsonb_array_length(p_dishes)-1) LOOP
+            current_item := p_dishes->i->>'dish_name';
+            quantity := (p_dishes->i->>'quantity')::int;
+
+            IF item_exist(current_item,'DISH') AND is_servable(current_item) THEN
+                INSERT INTO orders_dishes(dish_id, order_id, quantity)
+                VALUES (find_item(current_item, 'DISH'), new_order_id, quantity);
+            ELSE
+                RAISE EXCEPTION 'Dish "%" do not exists.', current_item;
+                RETURN;
+            END IF;
+        END LOOP;
+    END IF;
+
+    IF p_additions IS NOT NULL AND jsonb_array_length(p_additions) > 0 THEN
+        FOR i IN 0..(jsonb_array_elements(p_additions)-1) LOOP
+            current_item := p_additions->i->>'addition_name';
+            quantity := (p_additions->i->>'quantity')::int;
+
+            IF item_exist(current_item,'ADDITION') THEN
+                INSERT INTO orders_additions(addition_id, order_id, quantity)
+                VALUES (find_item(current_item, 'ADDITION'), new_order_id, quantity);
+            ELSE
+                RAISE EXCEPTION 'Addition "%" does not exist.', current_item;
+                RETURN;
+            END IF;
+        END LOOP;
+    END IF;
 END;
 $$;
