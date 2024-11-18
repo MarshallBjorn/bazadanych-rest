@@ -87,11 +87,16 @@ INSERT INTO "order_statuses" ("status") VALUES ('PENDING'), ('PROCESSING'), ('IN
 CREATE TABLE "orders" (
     "order_id" SERIAL PRIMARY KEY,
     "payment_method" int NOT NULL,
-    "delivery_id" varchar(11) NOT NULL,
+    "deliver" varchar(11) NOT NULL,
     "order_status" int NOT NULL,
-    "note" text,
+    "ordered_at" timestamp NOT NULL DEFAULT NOW(),
+    "last_status_update" timestamp NOT NULL DEFAULT NOW(),
+    "client_contact" varchar(11) NOT NULL,
+    "address" int NOT NULL, 
+    "note" text, 
     FOREIGN KEY("delivery_id") REFERENCES "staff"("pesel"),
     FOREIGN KEY("payment_method") REFERENCES "payment_methods"("payment_method_id"),
+    FOREIGN KEY("address") REFERENCES "addresses"("address_id"),
     FOREIGN KEY("order_status") REFERENCES "order_statuses"("order_status_id")
 );
 
