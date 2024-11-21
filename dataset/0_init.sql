@@ -1,6 +1,6 @@
 CREATE TABLE "addresses" (
     "address_id" SERIAL PRIMARY KEY,
-    "street" varchar(31) NOT NULL,
+    "street" varchar(30) NOT NULL,
     "locality" varchar(30) NOT NULL,
     "post_code" varchar(6) NOT NULL,
     "building_num" varchar(4) NOT NULL
@@ -25,11 +25,6 @@ CREATE TABLE "staff" (
     "birthday" date NOT NULL,
     "hire_date" date NOT NULL,
     FOREIGN KEY ("address") REFERENCES "addresses"("address_id") ON DELETE CASCADE
-);
-
-CREATE TABLE deliverers (
-    "pesel" varchar(11) PRIMARY KEY,
-    FOREIGN KEY ("pesel") REFERENCES "staff"("pesel") ON DELETE CASCADE
 );
 
 CREATE TABLE "components" (
@@ -87,19 +82,19 @@ CREATE TABLE "order_statuses" (
     "status" varchar(20) NOT NULL
 );
 
-INSERT INTO "order_statuses" ("status") VALUES ('PENDING'), ('PROCESSING'), ('IN DELIVERY'), ('COMPLETED'), ('CANCELED');
+INSERT INTO "order_statuses" ("status") VALUES ('PROCESSING'), ('IN DELIVERY'), ('COMPLETED'), ('CANCELED');
 
 CREATE TABLE "orders" (
     "order_id" SERIAL PRIMARY KEY,
     "payment_method" int NOT NULL,
-    "deliverer" varchar(11) NOT NULL,
-    "order_status" int NOT NULL DEFAULT 1,
+    "deliverer" NOT NULL,
+    "order_status" int NOT NULL,
     "ordered_at" timestamp NOT NULL DEFAULT NOW(),
     "last_status_update" timestamp NOT NULL DEFAULT NOW(),
     "client_contact" varchar(11) NOT NULL,
-    "address" int NOT NULL,
+    "address" int NOT NULL, 
     "note" text, 
-    FOREIGN KEY("deliverer") REFERENCES "deliverers"("pesel"),
+    FOREIGN KEY("deliverer") REFERENCES "("pesel"),
     FOREIGN KEY("payment_method") REFERENCES "payment_methods"("payment_method_id"),
     FOREIGN KEY("address") REFERENCES "addresses"("address_id"),
     FOREIGN KEY("order_status") REFERENCES "order_statuses"("order_status_id")
@@ -132,5 +127,3 @@ COPY components(component_name, price, availability) FROM '/docker-entrypoint-in
 COPY additions(addition_name, provider, price, availability) FROM '/docker-entrypoint-initdb.d/data/additions.csv' DELIMITER ';' CSV HEADER;
 COPY dishes_components(dish_id, component_id, quantity) FROM '/docker-entrypoint-initdb.d/data/dishes_components.csv' DELIMITER ';' CSV HEADER;
 COPY dishes_additions(addition_id, dish_id) FROM '/docker-entrypoint-initdb.d/data/dishes_additions.csv' DELIMITER ';' CSV HEADER;
-COPY staff(pesel, firstname, lastname, position, address, contact, gender, birthday, hire_date) FROM '/docker-entrypoint-initdb.d/data/staff.csv' DELIMITER ',' CSV HEADER;
-INSERT INTO deliverers(pesel) SELECT pesel FROM staff WHERE position = 'deliverer';
