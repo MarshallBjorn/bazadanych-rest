@@ -113,6 +113,34 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION assign_deliverer_to_order(p_order_id int)
+RETURNS void AS
+$$
+DECLARE
+    selected_deliverer varchar;
+BEGIN
+    -- Find an available deliverer with fewer than 3 active orders
+    SELECT pesel INTO selected_deliverer
+    FROM deliverers
+    WHERE (SELECT COUNT(*) FROM orders WHERE deliverer = deliverers.pesel AND order_status = 2) < 3
+    LIMIT 1;
+
+    -- If no deliverer is available, raise an exception
+    IF selected_deliverer IS NULL THEN
+        RAISE EXCEPTION 'No available deliverers to assign to order %', p_order_id;
+    END IF;
+
+    -- Update the order to assign the selected deliverer
+    UPDATE orders
+    SET deliverer = selected_deliverer
+    WHERE order_id = p_order_id;
+
+    RAISE NOTICE 'Order % has been assigned to deliverer %', p_order_id, selected_deliverer;
+END;
+$$
+LANGUAGE plpgsql;
+
+
 CREATE OR REPLACE FUNCTION update_order_status(p_order_id int)
 RETURNS void AS
 $$
@@ -135,7 +163,8 @@ BEGIN
     CASE current_status_id
         WHEN 1 THEN next_status_id := 2;  -- PROCESSING -> IN DELIVERY
         WHEN 2 THEN next_status_id := 3;  -- IN DELIVERY -> DELIVERED
-        WHEN 3 THEN next_status_id := 1;  -- DELIVERED -> PROCESSING
+        WHEN 3 THEN
+            RAISE EXCEPTION 'DELIVERED is the last possible order status.';  -- DELIVERED -> PROCESSING
         ELSE
             RAISE EXCEPTION 'Invalid current status ID % for order %', current_status_id, p_order_id;
     END CASE;

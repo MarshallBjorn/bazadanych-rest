@@ -3,4 +3,6 @@ pesel,firstname,lastname,position,address,contact,gender,birthday,hire_date
 23456789012,Jane,Smith,Chef,2,98765432102,false,1990-08-15,2019-07-15
 34567890123,Michael,Johnson,Waiter,3,98765432103,true,1995-11-30,2022-03-10
 45678901234,Emily,Williams,Chef,4,98765432104,false,1988-01-12,2021-09-05
-56789012345,David,Brown,Waiter,5,98765432105,true,1992-12-05,2023-02-18
+56789012345,David,Brown,Waiter,5,98765432105,true,1992-12-05,2023-02-13
+44678901234,Michael,Johnson,Deliverer,3,98231522103,true,1995-11-30,2022-03-10
+45678901235,Emily,Williams,Deliverer,4,98765523104,false,1988-01-12,2021-09-05
