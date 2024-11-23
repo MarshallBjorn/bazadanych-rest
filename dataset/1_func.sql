@@ -11,6 +11,8 @@ BEGIN
             SELECT EXISTS(SELECT 1 FROM additions WHERE p_name = addition_name) INTO do_exists;
         WHEN item_type = 'COMPONENT' THEN
             SELECT EXISTS(SELECT 1 FROM components WHERE p_name = addition_name) INTO do_exists;
+        WHEN item_type = 'PROVIDER' THEN
+            SELECT EXISTS(SELECT 1 FROM providers WHERE p_name = prod_name) INTO do_exists;
         ELSE
             RAISE EXCEPTION 'Unknown item of type:"%" and name:"%"',item_type,p_name;
             RETURN false;
@@ -32,8 +34,10 @@ BEGIN
     CASE
         WHEN item_type = 'DISH' THEN
             SELECT dish_id INTO id FROM dishes WHERE p_name = dish_name;
-        WHEN item_Type = 'ADDITION' THEN
+        WHEN item_type = 'ADDITION' THEN
             SELECT addition_id INTO id FROM additions WHERE p_name = addition_name;
+        WHEN item_type = 'PROVIDER' THEN
+            SELECT prod_id INTO id FROM providers WHERE p_name = prod_name;
         ELSE
             RAISE EXCEPTION 'Uknown item of type:"%"', item_type;
     END CASE;

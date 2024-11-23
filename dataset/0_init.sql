@@ -23,15 +23,17 @@ CREATE TABLE "staff" (
     "contact" varchar(11) UNIQUE NOT NULL,
     "gender" boolean NOT NULL,
     "birthday" date NOT NULL,
-    "hire_date" date NOT NULL,
+    "hire_date" date NOT NULL DEFAULT NOW(),
     FOREIGN KEY ("address") REFERENCES "addresses"("address_id") ON DELETE CASCADE
 );
 
 CREATE TABLE "components" (
     "component_id" SERIAL PRIMARY KEY,
     "component_name" varchar(20) UNIQUE NOT NULL,
+    "prod_id" int NOT NULL,
     "price" decimal(6,2) NOT NULL,
-    "availability" boolean NOT NULL
+    "availability" boolean NOT NULL,
+    FOREIGN KEY ("prod_id") REFERENCES "providers"("prod_id") 
 );
 
 CREATE TABLE "dishes" (
@@ -128,7 +130,7 @@ CREATE TABLE "orders_additions" (
 COPY dishes(dish_name, dish_type, price, description) FROM '/docker-entrypoint-initdb.d/data/dishes.csv' DELIMITER ';' CSV HEADER;
 COPY addresses(street, locality, post_code, building_num) FROM '/docker-entrypoint-initdb.d/data/addresses.csv' DELIMITER ';' CSV HEADER;
 COPY providers(prod_name, contact, address) FROM '/docker-entrypoint-initdb.d/data/providers.csv' DELIMITER ';' CSV HEADER;
-COPY components(component_name, price, availability) FROM '/docker-entrypoint-initdb.d/data/components.csv' DELIMITER ';' CSV HEADER;
+COPY components(component_name, prod_id, price, availability) FROM '/docker-entrypoint-initdb.d/data/components.csv' DELIMITER ';' CSV HEADER;
 COPY additions(addition_name, provider, price, availability) FROM '/docker-entrypoint-initdb.d/data/additions.csv' DELIMITER ';' CSV HEADER;
 COPY dishes_components(dish_id, component_id, quantity) FROM '/docker-entrypoint-initdb.d/data/dishes_components.csv' DELIMITER ';' CSV HEADER;
 COPY dishes_additions(addition_id, dish_id) FROM '/docker-entrypoint-initdb.d/data/dishes_additions.csv' DELIMITER ';' CSV HEADER;

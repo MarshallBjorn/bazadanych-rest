@@ -1,9 +1,9 @@
-component_name;price;availability
-Tomato Sauce;1.50;true
-Mozzarella Cheese;2.00;true
-Romaine Lettuce;0.80;true
-Beef Patty;3.00;true
-Salmon Fillet;5.50;true
-Basil;0.30;true
-Croutons;0.50;true
-Cream Sauce;1.25;true
+component_name;prod_id;price;availability
+Tomato Sauce;1;1.50;true
+Mozzarella Cheese;1;2.00;true
+Romaine Lettuce;2;0.80;true
+Beef Patty;2;3.00;true
+Salmon Fillet;3;5.50;true
+Basil;3;0.30;true
+Croutons;3;0.50;true
+Cream Sauce;3;1.25;true

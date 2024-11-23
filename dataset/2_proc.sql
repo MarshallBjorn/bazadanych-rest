@@ -184,3 +184,149 @@ BEGIN
     END IF;
 END;
 $$;
+
+CREATE OR REPLACE PROCEDURE add_provider(
+    p_prod_name varchar,
+    p_contact varchar,
+    p_address jsonb
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    address_id int;
+    do_exists boolean;
+BEGIN
+    -- Check if the provider already exists based on contact
+    SELECT EXISTS(SELECT 1 FROM providers WHERE prod_name = p_prod_name) INTO do_exists;
+
+    IF NOT do_exists THEN
+        RAISE NOTICE 'Provider with contact "%" already exists.', p_contact;
+        RETURN;
+    END IF;
+
+    -- Add or retrieve the address ID
+    SELECT new_address(p_address) INTO address_id;
+
+    -- Insert the new provider
+    INSERT INTO providers (prod_name, contact, address)
+    VALUES (p_prod_name, p_contact, address_id);
+
+    RAISE NOTICE 'Provider "%" added successfully.', p_prod_name;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE add_component(
+    p_component_name varchar,
+    p_provider_name varchar,
+    p_price decimal(6,2),
+    p_availability boolean
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    do_exists boolean;
+    current_prod_id int;
+BEGIN
+    IF item_exist(p_provider_name, 'PROVIDER') IS NULL THEN
+        RAISE EXCEPTION 'Provider % does not exist', p_provider_name;
+    END IF;
+
+    current_prod_id := find_item(p_provider_name, 'PROVIDER');
+    
+    -- Check if the component already exists
+    SELECT EXISTS(SELECT 1 FROM components WHERE component_name = p_component_name) INTO do_exists;
+    
+    IF do_exists THEN
+        RAISE NOTICE 'Component "%" already exists.', p_component_name;
+        RETURN;
+    END IF;
+
+    -- Insert the new component
+    INSERT INTO components (component_name, prod_id, price, availability)
+    VALUES (p_component_name, current_prod_id, p_price, p_availability);
+
+    RAISE NOTICE 'Component "%" added successfully.', p_component_name;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE add_addition(
+    p_addition_name varchar,
+    p_provider_name varchar,
+    p_price decimal(6,2),
+    p_availability boolean
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    provider_id int;
+    do_exists boolean;
+BEGIN
+    -- Retrieve the provider ID based on contact
+    SELECT prod_id INTO provider_id FROM providers WHERE prod_name = p_provider_name;
+
+    IF provider_id IS NULL THEN
+        RAISE EXCEPTION 'Provider with contact "%" not found.', p_provider_contact;
+    END IF;
+
+    -- Check if the addition already exists
+    SELECT EXISTS(SELECT 1 FROM additions WHERE addition_name = p_addition_name) INTO do_exists;
+
+    IF do_exists THEN
+        RAISE NOTICE 'Addition "%" already exists.', p_addition_name;
+        RETURN;
+    END IF;
+
+    -- Insert the new addition
+    INSERT INTO additions (addition_name, provider, price, availability)
+    VALUES (p_addition_name, provider_id, p_price, p_availability);
+
+    RAISE NOTICE 'Addition "%" added successfully.', p_addition_name;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE add_staff(
+    p_pesel varchar,
+    p_firstname varchar,
+    p_lastname varchar,
+    p_position varchar,
+    p_address jsonb,
+    p_contact varchar,
+    p_gender boolean,
+    p_birthday date
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    address_id int;
+    do_exists boolean;
+BEGIN
+    -- Check if the staff member already exists based on PESEL
+    SELECT EXISTS(SELECT 1 FROM staff WHERE pesel = p_pesel) INTO do_exists;
+
+    IF do_exists THEN
+        RAISE NOTICE 'Staff member with PESEL "%" already exists.', p_pesel;
+        RETURN;
+    END IF;
+
+    -- Check if the contact is unique
+    SELECT EXISTS(SELECT 1 FROM staff WHERE contact = p_contact) INTO do_exists;
+
+    IF do_exists THEN
+        RAISE NOTICE 'Staff member with contact "%" already exists.', p_contact;
+        RETURN;
+    END IF;
+
+    -- Add or retrieve the address ID
+    SELECT new_address(p_address) INTO address_id;
+
+    -- Insert the new staff member
+    INSERT INTO staff (pesel, firstname, lastname, position, address, contact, gender, birthday)
+    VALUES (p_pesel, p_firstname, p_lastname, p_position, address_id, p_contact, p_gender, p_birthday);
+
+    RAISE NOTICE 'Staff member "%" added successfully.', p_firstname || ' ' || p_lastname;
+END;
+$$;
