@@ -24,6 +24,24 @@ services:
       - "8080:80"
     depends_on:
       - postgres
+      
+  php-apache:
+    build: .
+    container_name: php_apache_container
+    volumes:
+    - ./website:/var/www/html
+    ports:
+    - "8000:80"
+    depends_on:
+    - postgres
+    environment:
+      PHP_POSTGRES_HOST: postgres
+      PHP_POSTGRES_DB: postgres
+      PHP_POSTGRES_USER: admin
+      PHP_POSTGRES_PASSWORD: password
+      PHP_EXTENSIONS: pgsql, pdo_pgsql
+
 
 volumes:
   postgres_data:
+  pgadmin_data:
