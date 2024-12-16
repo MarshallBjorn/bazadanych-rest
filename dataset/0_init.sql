@@ -1,6 +1,6 @@
 CREATE TABLE "addresses" (
     "address_id" SERIAL PRIMARY KEY,
-    "street" varchar(31) NOT NULL,
+    "street" varchar(30) NOT NULL,
     "locality" varchar(30) NOT NULL,
     "post_code" varchar(6) NOT NULL,
     "building_num" varchar(4) NOT NULL
@@ -11,6 +11,7 @@ CREATE TABLE "providers" (
     "prod_name" varchar(20) NOT NULL,
     "contact" varchar(11) UNIQUE NOT NULL,
     "address" int UNIQUE NOT NULL,
+    "is_partner" boolean DEFAULT FALSE,
     FOREIGN KEY ("address") REFERENCES "addresses"("address_id") ON DELETE CASCADE
 );
 
@@ -23,20 +24,31 @@ CREATE TABLE "staff" (
     "contact" varchar(11) UNIQUE NOT NULL,
     "gender" boolean NOT NULL,
     "birthday" date NOT NULL,
-    "hire_date" date NOT NULL,
+    "hire_date" date NOT NULL DEFAULT NOW(),
     FOREIGN KEY ("address") REFERENCES "addresses"("address_id") ON DELETE CASCADE
 );
 
-CREATE TABLE deliverers (
-    "pesel" varchar(11) PRIMARY KEY,
-    FOREIGN KEY ("pesel") REFERENCES "staff"("pesel") ON DELETE CASCADE
+CREATE SCHEMA auth;
+
+CREATE TABLE auth.users (
+    "user_id" SERIAL PRIMARY KEY,
+    "username" varchar(50) NOT NULL,
+    "password_hash" TEXT NOT NULL,
+    "created_at" timestamp DEFAULT NOW()
 );
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+INSERT INTO auth.users(username, password_hash)
+VALUES ('admin', crypt('2137', gen_salt('bf')));
 
 CREATE TABLE "components" (
     "component_id" SERIAL PRIMARY KEY,
     "component_name" varchar(20) UNIQUE NOT NULL,
+    "prod_id" int NOT NULL,
     "price" decimal(6,2) NOT NULL,
-    "availability" boolean NOT NULL
+    "availability" boolean NOT NULL,
+    FOREIGN KEY ("prod_id") REFERENCES "providers"("prod_id") 
 );
 
 CREATE TABLE "dishes" (
@@ -44,7 +56,7 @@ CREATE TABLE "dishes" (
     "dish_name" varchar(20) NOT NULL,
     "dish_type" varchar(20) NOT NULL,
     "price" decimal(6,2) NOT NULL,
-    "is_served" boolean NOT NULL DEFAULT TRUE,
+    "is_served" boolean NOT NULL DEFAULT FALSE,
     "description" text
 );
 
@@ -87,7 +99,12 @@ CREATE TABLE "order_statuses" (
     "status" varchar(20) NOT NULL
 );
 
-INSERT INTO "order_statuses" ("status") VALUES ('PENDING'), ('PROCESSING'), ('IN DELIVERY'), ('COMPLETED'), ('CANCELED');
+INSERT INTO "order_statuses" ("status") VALUES ('PROCESSING'), ('IN DELIVERY'), ('COMPLETED'), ('CANCELED');
+
+CREATE TABLE "deliverers" (
+    pesel varchar(11) PRIMARY KEY,
+    FOREIGN KEY (pesel) REFERENCES staff(pesel) ON DELETE CASCADE
+);
 
 CREATE TABLE "orders" (
     "order_id" SERIAL PRIMARY KEY,
@@ -97,7 +114,7 @@ CREATE TABLE "orders" (
     "ordered_at" timestamp NOT NULL DEFAULT NOW(),
     "last_status_update" timestamp NOT NULL DEFAULT NOW(),
     "client_contact" varchar(11) NOT NULL,
-    "address" int NOT NULL,
+    "address" int NOT NULL, 
     "note" text, 
     FOREIGN KEY("deliverer") REFERENCES "deliverers"("pesel"),
     FOREIGN KEY("payment_method") REFERENCES "payment_methods"("payment_method_id"),
@@ -128,9 +145,9 @@ CREATE TABLE "orders_additions" (
 COPY dishes(dish_name, dish_type, price, description) FROM '/docker-entrypoint-initdb.d/data/dishes.csv' DELIMITER ';' CSV HEADER;
 COPY addresses(street, locality, post_code, building_num) FROM '/docker-entrypoint-initdb.d/data/addresses.csv' DELIMITER ';' CSV HEADER;
 COPY providers(prod_name, contact, address) FROM '/docker-entrypoint-initdb.d/data/providers.csv' DELIMITER ';' CSV HEADER;
-COPY components(component_name, price, availability) FROM '/docker-entrypoint-initdb.d/data/components.csv' DELIMITER ';' CSV HEADER;
+COPY components(component_name, prod_id, price, availability) FROM '/docker-entrypoint-initdb.d/data/components.csv' DELIMITER ';' CSV HEADER;
 COPY additions(addition_name, provider, price, availability) FROM '/docker-entrypoint-initdb.d/data/additions.csv' DELIMITER ';' CSV HEADER;
 COPY dishes_components(dish_id, component_id, quantity) FROM '/docker-entrypoint-initdb.d/data/dishes_components.csv' DELIMITER ';' CSV HEADER;
 COPY dishes_additions(addition_id, dish_id) FROM '/docker-entrypoint-initdb.d/data/dishes_additions.csv' DELIMITER ';' CSV HEADER;
 COPY staff(pesel, firstname, lastname, position, address, contact, gender, birthday, hire_date) FROM '/docker-entrypoint-initdb.d/data/staff.csv' DELIMITER ',' CSV HEADER;
-INSERT INTO deliverers(pesel) SELECT pesel FROM staff WHERE position = 'Deliverer';
+INSERT INTO deliverers(pesel) SELECT pesel FROM staff WHERE position='Deliverer';

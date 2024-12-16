@@ -101,25 +101,34 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE dish_soft_toggle (
-    p_dish_name varchar,
-    p_dish_type varchar
+CREATE OR REPLACE PROCEDURE item_soft_toggle (
+    p_name varchar,
+    p_type varchar
 )
 LANGUAGE plpgsql
 AS
 $$
 DECLARE
-    dish_number int;
+    item_number int;
     current_status boolean;
 BEGIN
-    SELECT is_served INTO current_status FROM dishes WHERE dish_name = p_dish_name AND dish_type = p_dish_type;
-    IF current_status IS NULL THEN
-        RAISE EXCEPTION 'Dish % of the % type, does not exist.', p_dish_name, p_dish_type;
-        RETURN;
-    END IF;
-
-    UPDATE dishes SET is_served = NOT current_status WHERE dish_name = p_dish_name AND dish_type = p_dish_type;
-    RAISE NOTICE 'Dish "%" has been successfuly toggled, its current status: %', p_dish_name, NOT current_status;
+    CASE
+        WHEN p_type = 'DISH' THEN
+            item_number := find_item(p_name, p_type);
+            UPDATE dishes SET is_served = NOT is_served WHERE dish_id = item_number;
+        WHEN p_type = 'COMPONENT' THEN
+            item_number := find_item(p_name, p_type);
+            UPDATE components SET availability = NOT availability WHERE component_id = item_number;
+        WHEN p_type = 'ADDITION' THEN
+            item_number := find_item(p_name, p_type);
+            UPDATE additions SET availability = NOT availability WHERE addition_id = item_number;
+        WHEN p_type = 'PROVIDER' THEN
+            item_number := find_item(p_name, p_type);
+            UPDATE providers SET is_partner = NOT is_partner WHERE provider_id = item_number;
+        ELSE
+            RAISE EXCEPTION 'Unknown type: %', p_type;
+    END CASE;
+    RAISE NOTICE 'Item % of the % type has been successfuly toggled.', p_name, p_type;
 END;
 $$;
 
@@ -182,5 +191,151 @@ BEGIN
             END IF;
         END LOOP;
     END IF;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE add_provider(
+    p_prod_name varchar,
+    p_contact varchar,
+    p_address jsonb
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    address_id int;
+    do_exists boolean;
+BEGIN
+    -- Check if the provider already exists based on contact
+    SELECT EXISTS(SELECT 1 FROM providers WHERE prod_name = p_prod_name) INTO do_exists;
+
+    IF NOT do_exists THEN
+        RAISE NOTICE 'Provider with contact "%" already exists.', p_contact;
+        RETURN;
+    END IF;
+
+    -- Add or retrieve the address ID
+    SELECT new_address(p_address) INTO address_id;
+
+    -- Insert the new provider
+    INSERT INTO providers (prod_name, contact, address)
+    VALUES (p_prod_name, p_contact, address_id);
+
+    RAISE NOTICE 'Provider "%" added successfully.', p_prod_name;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE add_component(
+    p_component_name varchar,
+    p_provider_name varchar,
+    p_price decimal(6,2),
+    p_availability boolean
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    do_exists boolean;
+    current_prod_id int;
+BEGIN
+    IF item_exist(p_provider_name, 'PROVIDER') IS NULL THEN
+        RAISE EXCEPTION 'Provider % does not exist', p_provider_name;
+    END IF;
+
+    current_prod_id := find_item(p_provider_name, 'PROVIDER');
+    
+    -- Check if the component already exists
+    SELECT EXISTS(SELECT 1 FROM components WHERE component_name = p_component_name) INTO do_exists;
+    
+    IF do_exists THEN
+        RAISE NOTICE 'Component "%" already exists.', p_component_name;
+        RETURN;
+    END IF;
+
+    -- Insert the new component
+    INSERT INTO components (component_name, prod_id, price, availability)
+    VALUES (p_component_name, current_prod_id, p_price, p_availability);
+
+    RAISE NOTICE 'Component "%" added successfully.', p_component_name;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE add_addition(
+    p_addition_name varchar,
+    p_provider_name varchar,
+    p_price decimal(6,2),
+    p_availability boolean
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    provider_id int;
+    do_exists boolean;
+BEGIN
+    -- Retrieve the provider ID based on contact
+    SELECT prod_id INTO provider_id FROM providers WHERE prod_name = p_provider_name;
+
+    IF provider_id IS NULL THEN
+        RAISE EXCEPTION 'Provider with contact "%" not found.', p_provider_contact;
+    END IF;
+
+    -- Check if the addition already exists
+    SELECT EXISTS(SELECT 1 FROM additions WHERE addition_name = p_addition_name) INTO do_exists;
+
+    IF do_exists THEN
+        RAISE NOTICE 'Addition "%" already exists.', p_addition_name;
+        RETURN;
+    END IF;
+
+    -- Insert the new addition
+    INSERT INTO additions (addition_name, provider, price, availability)
+    VALUES (p_addition_name, provider_id, p_price, p_availability);
+
+    RAISE NOTICE 'Addition "%" added successfully.', p_addition_name;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE add_staff(
+    p_pesel varchar,
+    p_firstname varchar,
+    p_lastname varchar,
+    p_position varchar,
+    p_address jsonb,
+    p_contact varchar,
+    p_gender boolean,
+    p_birthday date
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    address_id int;
+    do_exists boolean;
+BEGIN
+    -- Check if the staff member already exists based on PESEL
+    SELECT EXISTS(SELECT 1 FROM staff WHERE pesel = p_pesel) INTO do_exists;
+
+    IF do_exists THEN
+        RAISE NOTICE 'Staff member with PESEL "%" already exists.', p_pesel;
+        RETURN;
+    END IF;
+
+    -- Check if the contact is unique
+    SELECT EXISTS(SELECT 1 FROM staff WHERE contact = p_contact) INTO do_exists;
+
+    IF do_exists THEN
+        RAISE NOTICE 'Staff member with contact "%" already exists.', p_contact;
+        RETURN;
+    END IF;
+
+    -- Add or retrieve the address ID
+    SELECT new_address(p_address) INTO address_id;
+
+    -- Insert the new staff member
+    INSERT INTO staff (pesel, firstname, lastname, position, address, contact, gender, birthday)
+    VALUES (p_pesel, p_firstname, p_lastname, p_position, address_id, p_contact, p_gender, p_birthday);
+
+    RAISE NOTICE 'Staff member "%" added successfully.', p_firstname || ' ' || p_lastname;
 END;
 $$;
