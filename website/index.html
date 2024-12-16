@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <script src="./scripts/formValidation.js"></script>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <div id="page">
+            <div id="form-container">
+                <h2>Logowanie</h2>
+                <form action="formHandler.php" method="post" id="login-form">
+                    <label for="login">ID</label>
+                    <input type="text" name="login" id="login">
+
+                    <label for="password">Hasło</label>
+                    <input type="password" name="password" id="password">
+
+                    <button type="button" onclick="formValidation()">Zaloguj sie</button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,6 @@
+function loginFormValidation() {
+}
+
+function dishFormValidation() {
+    
+}

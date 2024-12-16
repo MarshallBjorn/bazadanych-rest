@@ -57,7 +57,7 @@ CREATE OR REPLACE FUNCTION list_served_dishes()
 RETURNS SETOF RECORD AS
 $$
 DECLARE
-    dish_cursor CURSOR FOR SELECT dish_id, dish_name, dish_type, price, description FROM dishes WHERE is_served = TRUE;
+    dish_cursor CURSOR FOR SELECT dish_name, dish_type, price, description FROM dishes WHERE is_served = TRUE;
     result_record RECORD;
 BEGIN
     -- Open the cursor
