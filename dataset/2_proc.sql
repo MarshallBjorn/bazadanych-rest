@@ -149,8 +149,8 @@ BEGIN
     END IF;
 
     SELECT new_address(p_address) INTO address_id;
-    INSERT INTO orders(payment_method, deliver, client_contact, address, note)
-    VALUES(current_payment_method, '12345678901', p_client_contact, address_id, p_note)
+    INSERT INTO orders(payment_method, client_contact, address, note)
+    VALUES(current_payment_method, p_client_contact, address_id, p_note)
     RETURNING order_id INTO new_order_id;
 
     IF p_dishes IS NOT NULL AND jsonb_array_length(p_dishes) > 0 THEN

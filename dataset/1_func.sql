@@ -112,3 +112,30 @@ BEGIN
     RETURN address_number;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION assign_deliverer_to_order(p_order_id int)
+RETURNS void AS
+$$
+DECLARE
+    selected_deliverer varchar;
+BEGIN
+    -- Find an available deliverer with fewer than 3 active orders
+    SELECT pesel INTO selected_deliverer
+    FROM deliverers
+    WHERE SELECT COUNT(*) FROM orders WHERE deliverer = deliverers.pesel AND order_status = 3
+    LIMIT 1;
+
+    -- If no deliverer is available, raise an exception
+    IF selected_deliverer IS NULL THEN
+        RAISE EXCEPTION 'No available deliverers to assign to order %', p_order_id;
+    END IF;
+
+    -- Update the order to assign the selected deliverer
+    UPDATE orders
+    SET deliver = selected_deliverer
+    WHERE order_id = p_order_id;
+
+    RAISE NOTICE 'Order % has been assigned to deliverer %', p_order_id, selected_deliverer;
+END;
+$$
+LANGUAGE plpgsql;

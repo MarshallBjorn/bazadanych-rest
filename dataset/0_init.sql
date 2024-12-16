@@ -16,8 +16,8 @@ CREATE TABLE "providers" (
 
 CREATE TABLE "staff" (
     "pesel" varchar(11) PRIMARY KEY,
-    "firstname" varchar(10) NOT NULL,
-    "lastname" varchar(15) NOT NULL,
+    "firstname" varchar(30) NOT NULL,
+    "lastname" varchar(30) NOT NULL,
     "position" varchar(20) NOT NULL,
     "address" int NOT NULL,
     "contact" varchar(11) UNIQUE NOT NULL,
@@ -92,7 +92,7 @@ INSERT INTO "order_statuses" ("status") VALUES ('PENDING'), ('PROCESSING'), ('IN
 CREATE TABLE "orders" (
     "order_id" SERIAL PRIMARY KEY,
     "payment_method" int NOT NULL,
-    "deliverer" varchar(11) NOT NULL,
+    "deliverer" varchar(11),
     "order_status" int NOT NULL DEFAULT 1,
     "ordered_at" timestamp NOT NULL DEFAULT NOW(),
     "last_status_update" timestamp NOT NULL DEFAULT NOW(),
@@ -133,4 +133,4 @@ COPY additions(addition_name, provider, price, availability) FROM '/docker-entry
 COPY dishes_components(dish_id, component_id, quantity) FROM '/docker-entrypoint-initdb.d/data/dishes_components.csv' DELIMITER ';' CSV HEADER;
 COPY dishes_additions(addition_id, dish_id) FROM '/docker-entrypoint-initdb.d/data/dishes_additions.csv' DELIMITER ';' CSV HEADER;
 COPY staff(pesel, firstname, lastname, position, address, contact, gender, birthday, hire_date) FROM '/docker-entrypoint-initdb.d/data/staff.csv' DELIMITER ',' CSV HEADER;
-INSERT INTO deliverers(pesel) SELECT pesel FROM staff WHERE position = 'deliverer';
+INSERT INTO deliverers(pesel) SELECT pesel FROM staff WHERE position = 'Deliverer';
