@@ -11,7 +11,7 @@ CREATE TABLE "providers" (
     "prod_name" varchar(20) NOT NULL,
     "contact" varchar(11) UNIQUE NOT NULL,
     "address" int UNIQUE NOT NULL,
-    "is_partner" boolean DEFAULT FALSE; 
+    "is_partner" boolean DEFAULT FALSE,
     FOREIGN KEY ("address") REFERENCES "addresses"("address_id") ON DELETE CASCADE
 );
 
@@ -27,6 +27,20 @@ CREATE TABLE "staff" (
     "hire_date" date NOT NULL DEFAULT NOW(),
     FOREIGN KEY ("address") REFERENCES "addresses"("address_id") ON DELETE CASCADE
 );
+
+CREATE SCHEMA auth;
+
+CREATE TABLE auth.users (
+    "user_id" SERIAL PRIMARY KEY,
+    "username" varchar(50) NOT NULL,
+    "password_hash" TEXT NOT NULL,
+    "created_at" timestamp DEFAULT NOW()
+);
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+INSERT INTO auth.users(username, password_hash)
+VALUES ('admin', crypt('2137', gen_salt('bf')));
 
 CREATE TABLE "components" (
     "component_id" SERIAL PRIMARY KEY,

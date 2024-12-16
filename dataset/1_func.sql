@@ -89,6 +89,28 @@ END;
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION list_all_additions()
+RETURNS SETOF RECORD AS
+$$
+DECLARE
+    addition_cursor CURSOR FOR SELECT addition_id, addition_name, provider, price FROM additions WHERE availability = TRUE;
+    result_record RECORD;
+BEGIN
+    OPEN addition_cursor;
+
+    LOOP
+        FETCH addition_cursor INTO result_record;
+        EXIT WHEN NOT FOUND;
+
+        RETURN NEXT result_record;
+    END LOOP;
+    
+    CLOSE addition_cursor;
+    RETURN;
+END;
+$$
+LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION new_address(p_address jsonb DEFAULT '[]'::jsonb)
 RETURNS int AS
 $$
@@ -200,5 +222,26 @@ END;
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION auth.login(username_input VARCHAR, password_input VARCHAR)
+RETURNS BOOLEAN AS $$
+DECLARE
+    stored_hash TEXT;
+BEGIN
+    -- Fetch the hashed password for the given username
+    SELECT password_hash INTO stored_hash
+    FROM auth.users
+    WHERE username = username_input;
 
+    -- If no user found, return FALSE
+    IF NOT FOUND THEN
+        RETURN FALSE;
+    END IF;
 
+    -- Verify the provided password against the stored hash
+    IF crypt(password_input, stored_hash) = stored_hash THEN
+        RETURN TRUE; -- Login successful
+    ELSE
+        RETURN FALSE; -- Login failed
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
