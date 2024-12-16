@@ -34,14 +34,19 @@ BEGIN
     CASE
         WHEN item_type = 'DISH' THEN
             SELECT dish_id INTO id FROM dishes WHERE p_name = dish_name;
+        WHEN item_type = 'COMPONENT' THEN
+            SELECT component_id INTO id FROM components WHERE p_name = component_name;
         WHEN item_type = 'ADDITION' THEN
             SELECT addition_id INTO id FROM additions WHERE p_name = addition_name;
         WHEN item_type = 'PROVIDER' THEN
             SELECT prod_id INTO id FROM providers WHERE p_name = prod_name;
         ELSE
-            RAISE EXCEPTION 'Uknown item of type:"%"', item_type;
+            RAISE EXCEPTION 'Uknown item of type:"%" and name:"%"', item_type, p_name;
     END CASE;
 
+    IF id IS NULL THEN
+        RAISE EXCEPTION 'Item "%" of type "%" has not been found.', p_name, item_type;
+    END IF;
     RETURN id;
 END;
 $$ LANGUAGE plpgsql;

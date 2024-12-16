@@ -101,25 +101,34 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE dish_soft_toggle (
-    p_dish_name varchar,
-    p_dish_type varchar
+CREATE OR REPLACE PROCEDURE item_soft_toggle (
+    p_name varchar,
+    p_type varchar
 )
 LANGUAGE plpgsql
 AS
 $$
 DECLARE
-    dish_number int;
+    item_number int;
     current_status boolean;
 BEGIN
-    SELECT is_served INTO current_status FROM dishes WHERE dish_name = p_dish_name AND dish_type = p_dish_type;
-    IF current_status IS NULL THEN
-        RAISE EXCEPTION 'Dish % of the % type, does not exist.', p_dish_name, p_dish_type;
-        RETURN;
-    END IF;
-
-    UPDATE dishes SET is_served = NOT current_status WHERE dish_name = p_dish_name AND dish_type = p_dish_type;
-    RAISE NOTICE 'Dish "%" has been successfuly toggled, its current status: %', p_dish_name, NOT current_status;
+    CASE
+        WHEN p_type = 'DISH' THEN
+            item_number := find_item(p_name, p_type);
+            UPDATE dishes SET is_served = NOT is_served WHERE dish_id = item_number;
+        WHEN p_type = 'COMPONENT' THEN
+            item_number := find_item(p_name, p_type);
+            UPDATE components SET availability = NOT availability WHERE component_id = item_number;
+        WHEN p_type = 'ADDITION' THEN
+            item_number := find_item(p_name, p_type);
+            UPDATE additions SET availability = NOT availability WHERE addition_id = item_number;
+        WHEN p_type = 'PROVIDER' THEN
+            item_number := find_item(p_name, p_type);
+            UPDATE providers SET is_partner = NOT is_partner WHERE provider_id = item_number;
+        ELSE
+            RAISE EXCEPTION 'Unknown type: %', p_type;
+    END CASE;
+    RAISE NOTICE 'Item % of the % type has been successfuly toggled.', p_name, p_type;
 END;
 $$;
 

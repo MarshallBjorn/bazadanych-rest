@@ -11,6 +11,7 @@ CREATE TABLE "providers" (
     "prod_name" varchar(20) NOT NULL,
     "contact" varchar(11) UNIQUE NOT NULL,
     "address" int UNIQUE NOT NULL,
+    "is_partner" boolean DEFAULT FALSE; 
     FOREIGN KEY ("address") REFERENCES "addresses"("address_id") ON DELETE CASCADE
 );
 
@@ -41,7 +42,7 @@ CREATE TABLE "dishes" (
     "dish_name" varchar(20) NOT NULL,
     "dish_type" varchar(20) NOT NULL,
     "price" decimal(6,2) NOT NULL,
-    "is_served" boolean NOT NULL DEFAULT TRUE,
+    "is_served" boolean NOT NULL DEFAULT FALSE,
     "description" text
 );
 
