@@ -62,11 +62,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION list_served_dishes()
+CREATE OR REPLACE FUNCTION list_all_dishes()
 RETURNS SETOF RECORD AS
 $$
 DECLARE
-    dish_cursor CURSOR FOR SELECT dish_name, dish_type, price, description FROM dishes WHERE is_served = TRUE;
+    dish_cursor CURSOR FOR SELECT dish_name, dish_type, price, is_served, description FROM dishes;
     result_record RECORD;
 BEGIN
     -- Open the cursor

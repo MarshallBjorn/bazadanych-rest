@@ -28,7 +28,7 @@
                     <?php 
                     include './database/config.php';
 
-                    $query = "SELECT * FROM list_served_dishes() AS t(dish_id INT, dish_name VARCHAR, dish_type VARCHAR, price NUMERIC, description TEXT)";
+                    $query = "SELECT * FROM list_all_dishes() AS t(dish_name VARCHAR, dish_type VARCHAR, price NUMERIC, is_served boolean, description TEXT)";
                     $result = pg_query($db, $query);
 
                     if(!$result) {
@@ -41,7 +41,8 @@
                         echo "<p class=item-element> $row[dish_name]</p>". 
                             "<p class=item-element> $row[dish_type]</p>". 
                             "<p class=item-element> $row[price]</p>".
-                            "<p class=item-element> $row[description]</p>";
+                            "<p class=item-element> $row[description]</p>".
+                            "<p class=item-element> $row[is_served]</p>";
                         echo "<button type=button> Edytuj </button>";
                         echo "</div>";
                     }
