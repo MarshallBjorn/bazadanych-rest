@@ -66,7 +66,7 @@ CREATE OR REPLACE FUNCTION list_served_dishes()
 RETURNS SETOF RECORD AS
 $$
 DECLARE
-    dish_cursor CURSOR FOR SELECT dish_id, dish_name, dish_type, price, description FROM dishes WHERE is_served = TRUE;
+    dish_cursor CURSOR FOR SELECT dish_name, dish_type, price, description FROM dishes WHERE is_served = TRUE;
     result_record RECORD;
 BEGIN
     -- Open the cursor
@@ -93,7 +93,7 @@ CREATE OR REPLACE FUNCTION list_all_additions()
 RETURNS SETOF RECORD AS
 $$
 DECLARE
-    addition_cursor CURSOR FOR SELECT addition_id, addition_name, provider, price FROM additions WHERE availability = TRUE;
+    addition_cursor CURSOR FOR SELECT addition_name, provider, price FROM additions WHERE availability = TRUE;
     result_record RECORD;
 BEGIN
     OPEN addition_cursor;
@@ -107,6 +107,42 @@ BEGIN
     
     CLOSE addition_cursor;
     RETURN;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION list_all_components()
+RETURNS SETOF RECORD AS
+$$
+DECLARE
+    component_cursor CURSOR FOR SELECT component_name, provider, price FROM components WHERE availability = TRUE;
+    result_record RECORD;
+BEGIN
+    OPEN component_cursor;
+
+    LOOP
+        FETCH component_cursor INTO result_record;
+        EXIT WHEN NOT FOUND;
+
+        RETURN NEXT result_record;
+    END LOOP;
+    
+    CLOSE component_cursor;
+    RETURN;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION list_client_orders(
+    p_client varchar(11)
+)
+RETURNS TABLE (ord_id int, pay_meth int, deliv varchar, ordr_stat int, ord_at timestamp, last_update timestamp, client varchar, address_number int, cust_note text) AS
+$$
+BEGIN
+    RETURN QUERY
+    SELECT order_id, payment_method, deliverer, order_status, ordered_at, last_status_update, client_contact, address, note
+    FROM orders
+    WHERE p_client = client_contact;
 END;
 $$
 LANGUAGE plpgsql;
@@ -245,3 +281,28 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION order_sum(p_order_id int)
+RETURNS INT AS $$
+DECLARE
+    total_addition int := 0;
+    total_dish int := 0;
+    total_price int := 0;
+BEGIN
+    SELECT COALESCE(SUM(d.quantity * d.price), 0)
+    INTO total_dish
+    FROM orders_dishes od
+    JOIN dishes d ON od.dish_id = d.dish_id
+    WHERE od.order_id = p_order_id;
+
+    SELECT COALESCE(SUM(a.quantity * a.price), 0)
+    INTO total_addition
+    FROM orders_additions oa
+    JOIN additions a ON oa.addtion_id = a.addtion_id
+    WHERE oa.order_id = p_order_id;
+
+    total_price := total_addition + total_dish;
+    RETURN total_price;
+END;
+$$
+LANGUAGE plpgsql
