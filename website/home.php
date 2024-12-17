@@ -1,3 +1,9 @@
+<?php session_start();
+    if(!isset($_SESSION['logged'])) 
+    {
+        header("Location:index.html"); 
+    }
+?>
 <html>
     <head>
         <meta charset="UTF-8">
@@ -9,7 +15,7 @@
             <div id="side-panel">
                 <div id="account">
                     <img src="image/avatar.png" alt="avatar">
-                    <p>Zalogowany <? ?></p>
+                    <p>Zalogowany: <?php echo $_SESSION['logged']; ?></p>
                 </div>
                 <button type="button" onclick="changeView()">Nowe zamówienie</button>
                 <button type="button">Aktualne zamówienia</button>

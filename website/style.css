@@ -42,6 +42,10 @@ body {
     align-self: center;
 }
 
+#error {
+    color: red;
+}
+
 /* App 'dishes  list' */
 
 #app {
