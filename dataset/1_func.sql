@@ -11,6 +11,8 @@ BEGIN
             SELECT EXISTS(SELECT 1 FROM additions WHERE p_name = addition_name) INTO do_exists;
         WHEN item_type = 'COMPONENT' THEN
             SELECT EXISTS(SELECT 1 FROM components WHERE p_name = addition_name) INTO do_exists;
+        WHEN item_type = 'PROVIDER' THEN
+            SELECT EXISTS(SELECT 1 FROM providers WHERE p_name = prod_name) INTO do_exists;
         ELSE
             RAISE EXCEPTION 'Unknown item of type:"%" and name:"%"',item_type,p_name;
             RETURN false;
@@ -32,12 +34,19 @@ BEGIN
     CASE
         WHEN item_type = 'DISH' THEN
             SELECT dish_id INTO id FROM dishes WHERE p_name = dish_name;
-        WHEN item_Type = 'ADDITION' THEN
+        WHEN item_type = 'COMPONENT' THEN
+            SELECT component_id INTO id FROM components WHERE p_name = component_name;
+        WHEN item_type = 'ADDITION' THEN
             SELECT addition_id INTO id FROM additions WHERE p_name = addition_name;
+        WHEN item_type = 'PROVIDER' THEN
+            SELECT prod_id INTO id FROM providers WHERE p_name = prod_name;
         ELSE
-            RAISE EXCEPTION 'Uknown item of type:"%"', item_type;
+            RAISE EXCEPTION 'Uknown item of type:"%" and name:"%"', item_type, p_name;
     END CASE;
 
+    IF id IS NULL THEN
+        RAISE EXCEPTION 'Item "%" of type "%" has not been found.', p_name, item_type;
+    END IF;
     RETURN id;
 END;
 $$ LANGUAGE plpgsql;
@@ -80,6 +89,64 @@ END;
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION list_all_additions()
+RETURNS SETOF RECORD AS
+$$
+DECLARE
+    addition_cursor CURSOR FOR SELECT addition_name, provider, price FROM additions WHERE availability = TRUE;
+    result_record RECORD;
+BEGIN
+    OPEN addition_cursor;
+
+    LOOP
+        FETCH addition_cursor INTO result_record;
+        EXIT WHEN NOT FOUND;
+
+        RETURN NEXT result_record;
+    END LOOP;
+    
+    CLOSE addition_cursor;
+    RETURN;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION list_all_components()
+RETURNS SETOF RECORD AS
+$$
+DECLARE
+    component_cursor CURSOR FOR SELECT component_name, provider, price FROM components WHERE availability = TRUE;
+    result_record RECORD;
+BEGIN
+    OPEN component_cursor;
+
+    LOOP
+        FETCH component_cursor INTO result_record;
+        EXIT WHEN NOT FOUND;
+
+        RETURN NEXT result_record;
+    END LOOP;
+    
+    CLOSE component_cursor;
+    RETURN;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION list_client_orders(
+    p_client varchar(11)
+)
+RETURNS TABLE (ord_id int, pay_meth int, deliv varchar, ordr_stat int, ord_at timestamp, last_update timestamp, client varchar, address_number int, cust_note text) AS
+$$
+BEGIN
+    RETURN QUERY
+    SELECT order_id, payment_method, deliverer, order_status, ordered_at, last_status_update, client_contact, address, note
+    FROM orders
+    WHERE p_client = client_contact;
+END;
+$$
+LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION new_address(p_address jsonb DEFAULT '[]'::jsonb)
 RETURNS int AS
 $$
@@ -112,3 +179,130 @@ BEGIN
     RETURN address_number;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION assign_deliverer_to_order(p_order_id int)
+RETURNS void AS
+$$
+DECLARE
+    selected_deliverer varchar;
+BEGIN
+    -- Find an available deliverer with fewer than 3 active orders
+    SELECT pesel INTO selected_deliverer
+    FROM deliverers
+    WHERE (SELECT COUNT(*) FROM orders WHERE deliverer = deliverers.pesel AND order_status = 2) < 3
+    LIMIT 1;
+
+    -- If no deliverer is available, raise an exception
+    IF selected_deliverer IS NULL THEN
+        RAISE EXCEPTION 'No available deliverers to assign to order %', p_order_id;
+    END IF;
+
+    -- Update the order to assign the selected deliverer
+    UPDATE orders
+    SET deliverer = selected_deliverer
+    WHERE order_id = p_order_id;
+
+    RAISE NOTICE 'Order % has been assigned to deliverer %', p_order_id, selected_deliverer;
+END;
+$$
+LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION update_order_status(p_order_id int)
+RETURNS void AS
+$$
+DECLARE
+    current_status_id int;
+    next_status_id int;
+    next_status_name varchar;
+BEGIN
+    -- Get the current status of the order
+    SELECT order_status INTO current_status_id
+    FROM orders
+    WHERE order_id = p_order_id;
+
+    -- If the order does not exist, raise an exception
+    IF current_status_id IS NULL THEN
+        RAISE EXCEPTION 'Order % does not exist.', p_order_id;
+    END IF;
+
+    -- Determine the next status in the cycle
+    CASE current_status_id
+        WHEN 1 THEN next_status_id := 2;  -- PROCESSING -> IN DELIVERY
+        WHEN 2 THEN next_status_id := 3;  -- IN DELIVERY -> DELIVERED
+        WHEN 3 THEN
+            RAISE EXCEPTION 'DELIVERED is the last possible order status.';  -- DELIVERED -> PROCESSING
+        ELSE
+            RAISE EXCEPTION 'Invalid current status ID % for order %', current_status_id, p_order_id;
+    END CASE;
+
+    -- Get the name of the next status (for debugging)
+    SELECT status INTO next_status_name
+    FROM order_statuses
+    WHERE order_status_id = next_status_id;
+
+    -- Update the order's status
+    UPDATE orders
+    SET order_status = next_status_id,
+        last_status_update = NOW()
+    WHERE order_id = p_order_id;
+
+    -- If the new status is "IN DELIVERY", call assign_deliverer_to_order
+    IF next_status_name = 'IN DELIVERY' THEN
+        PERFORM assign_deliverer_to_order(p_order_id);  -- Call the deliverer assignment function
+    END IF;
+
+    -- Confirm the status update
+    RAISE NOTICE 'Order % status updated to %', p_order_id, next_status_name;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION auth.login(username_input VARCHAR, password_input VARCHAR)
+RETURNS BOOLEAN AS $$
+DECLARE
+    stored_hash TEXT;
+BEGIN
+    -- Fetch the hashed password for the given username
+    SELECT password_hash INTO stored_hash
+    FROM auth.users
+    WHERE username = username_input;
+
+    -- If no user found, return FALSE
+    IF NOT FOUND THEN
+        RETURN FALSE;
+    END IF;
+
+    -- Verify the provided password against the stored hash
+    IF crypt(password_input, stored_hash) = stored_hash THEN
+        RETURN TRUE; -- Login successful
+    ELSE
+        RETURN FALSE; -- Login failed
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION order_sum(p_order_id int)
+RETURNS INT AS $$
+DECLARE
+    total_addition int := 0;
+    total_dish int := 0;
+    total_price int := 0;
+BEGIN
+    SELECT COALESCE(SUM(d.quantity * d.price), 0)
+    INTO total_dish
+    FROM orders_dishes od
+    JOIN dishes d ON od.dish_id = d.dish_id
+    WHERE od.order_id = p_order_id;
+
+    SELECT COALESCE(SUM(a.quantity * a.price), 0)
+    INTO total_addition
+    FROM orders_additions oa
+    JOIN additions a ON oa.addtion_id = a.addtion_id
+    WHERE oa.order_id = p_order_id;
+
+    total_price := total_addition + total_dish;
+    RETURN total_price;
+END;
+$$
+LANGUAGE plpgsql
