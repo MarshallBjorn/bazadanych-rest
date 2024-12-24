@@ -8,15 +8,16 @@
         <div id="page">
             <div id="form-container">
                 <h2>Logowanie</h2>
-                <form action="formHandler.php" method="post" id="login-form">
+                <form action="./controller/formHandler.php" method="post" id="login-form">
                     <label for="login">ID</label>
-                    <input type="text" name="login" id="login">
+                    <input type="text" name="login" id="login" class="form-inputs">
 
                     <label for="password">Hasło</label>
-                    <input type="password" name="password" id="password">
+                    <input type="password" name="password" id="password" class="form-inputs">
 
-                    <button type="button" onclick="formValidation()">Zaloguj sie</button>
+                    <button type="button" onclick="loginFormValidation()">Zaloguj sie</button>
                 </form>
+                <p id="error"></p>
             </div>
         </div>
     </body>
