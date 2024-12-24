@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE add_new_dish(
+CREATE OR REPLACE PROCEDURE tools.add_new_dish(
     p_dish_name varchar,
     p_dish_type varchar,
     p_price decimal(6,2),
@@ -17,7 +17,7 @@ DECLARE
     quantity int;
 	do_exists boolean;
 BEGIN
-    SELECT item_exist(p_dish_name,'DISH') INTO do_exists;
+    SELECT utils.item_exist(p_dish_name,'DISH') INTO do_exists;
     -- SELECT EXISTS(SELECT 1 FROM dishes WHERE dish_name = p_dish_name AND dish_type = p_dish_type) INTO do_exists;
 
     IF do_exists THEN
@@ -71,7 +71,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE remove_dish_hard (
+CREATE OR REPLACE PROCEDURE tools.remove_dish_hard (
     p_dish_name varchar,
     p_dish_type varchar
 )
@@ -101,7 +101,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE item_soft_toggle (
+CREATE OR REPLACE PROCEDURE tools.item_soft_toggle (
     p_name varchar,
     p_type varchar
 )
@@ -114,16 +114,16 @@ DECLARE
 BEGIN
     CASE
         WHEN p_type = 'DISH' THEN
-            item_number := find_item(p_name, p_type);
+            item_number := utils.find_item(p_name, p_type);
             UPDATE dishes SET is_served = NOT is_served WHERE dish_id = item_number;
         WHEN p_type = 'COMPONENT' THEN
-            item_number := find_item(p_name, p_type);
+            item_number := utils.find_item(p_name, p_type);
             UPDATE components SET availability = NOT availability WHERE component_id = item_number;
         WHEN p_type = 'ADDITION' THEN
-            item_number := find_item(p_name, p_type);
+            item_number := utils.find_item(p_name, p_type);
             UPDATE additions SET availability = NOT availability WHERE addition_id = item_number;
         WHEN p_type = 'PROVIDER' THEN
-            item_number := find_item(p_name, p_type);
+            item_number := utils.find_item(p_name, p_type);
             UPDATE providers SET is_partner = NOT is_partner WHERE provider_id = item_number;
         ELSE
             RAISE EXCEPTION 'Unknown type: %', p_type;
@@ -132,7 +132,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE create_new_order (
+CREATE OR REPLACE PROCEDURE tools.create_new_order (
     p_payment_method_name varchar,
     p_client_contact varchar,
     p_note text,
@@ -157,7 +157,7 @@ BEGIN
         RAISE EXCEPTION 'Payment method "%" not found.', current_payment_method;
     END IF;
 
-    SELECT new_address(p_address) INTO address_id;
+    SELECT tools.new_address(p_address) INTO address_id;
     INSERT INTO orders(payment_method, client_contact, address, note)
     VALUES(current_payment_method, p_client_contact, address_id, p_note)
     RETURNING order_id INTO new_order_id;
@@ -167,9 +167,9 @@ BEGIN
             current_item := p_dishes->i->>'dish_name';
             quantity := (p_dishes->i->>'quantity')::int;
 
-            IF item_exist(current_item,'DISH') AND is_servable(current_item) THEN
+            IF utils.item_exist(current_item,'DISH') AND is_servable(current_item) THEN
                 INSERT INTO orders_dishes(dish_id, order_id, quantity)
-                VALUES (find_item(current_item, 'DISH'), new_order_id, quantity);
+                VALUES (utils.find_item(current_item, 'DISH'), new_order_id, quantity);
             ELSE
                 RAISE EXCEPTION 'Dish "%" do not exists.', current_item;
                 RETURN;
@@ -182,9 +182,9 @@ BEGIN
             current_item := p_additions->i->>'addition_name';
             quantity := (p_additions->i->>'quantity')::int;
 
-            IF item_exist(current_item,'ADDITION') THEN
+            IF utils.item_exist(current_item,'ADDITION') THEN
                 INSERT INTO orders_additions(addition_id, order_id, quantity)
-                VALUES (find_item(current_item, 'ADDITION'), new_order_id, quantity);
+                VALUES (utils.find_item(current_item, 'ADDITION'), new_order_id, quantity);
             ELSE
                 RAISE EXCEPTION 'Addition "%" does not exist.', current_item;
                 RETURN;
@@ -194,7 +194,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE add_provider(
+CREATE OR REPLACE PROCEDURE tools.add_provider(
     p_prod_name varchar,
     p_contact varchar,
     p_address jsonb
@@ -215,7 +215,7 @@ BEGIN
     END IF;
 
     -- Add or retrieve the address ID
-    SELECT new_address(p_address) INTO address_id;
+    SELECT tools.new_address(p_address) INTO address_id;
 
     -- Insert the new provider
     INSERT INTO providers (prod_name, contact, address)
@@ -225,7 +225,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE add_component(
+CREATE OR REPLACE PROCEDURE tools.add_component(
     p_component_name varchar,
     p_provider_name varchar,
     p_price decimal(6,2),
@@ -238,11 +238,11 @@ DECLARE
     do_exists boolean;
     current_prod_id int;
 BEGIN
-    IF item_exist(p_provider_name, 'PROVIDER') IS NULL THEN
+    IF utils.item_exist(p_provider_name, 'PROVIDER') IS NULL THEN
         RAISE EXCEPTION 'Provider % does not exist', p_provider_name;
     END IF;
 
-    current_prod_id := find_item(p_provider_name, 'PROVIDER');
+    current_prod_id := utils.find_item(p_provider_name, 'PROVIDER');
     
     -- Check if the component already exists
     SELECT EXISTS(SELECT 1 FROM components WHERE component_name = p_component_name) INTO do_exists;
@@ -260,7 +260,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE add_addition(
+CREATE OR REPLACE PROCEDURE tools.add_addition(
     p_addition_name varchar,
     p_provider_name varchar,
     p_price decimal(6,2),
@@ -296,7 +296,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE add_staff(
+CREATE OR REPLACE PROCEDURE tools.add_staff(
     p_pesel varchar,
     p_firstname varchar,
     p_lastname varchar,
@@ -330,7 +330,7 @@ BEGIN
     END IF;
 
     -- Add or retrieve the address ID
-    SELECT new_address(p_address) INTO address_id;
+    SELECT tools.new_address(p_address) INTO address_id;
 
     -- Insert the new staff member
     INSERT INTO staff (pesel, firstname, lastname, position, address, contact, gender, birthday)

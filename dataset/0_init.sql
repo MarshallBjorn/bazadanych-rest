@@ -153,3 +153,7 @@ COPY dishes_components(dish_id, component_id, quantity) FROM '/docker-entrypoint
 COPY dishes_additions(addition_id, dish_id) FROM '/docker-entrypoint-initdb.d/data/dishes_additions.csv' DELIMITER ';' CSV HEADER;
 COPY staff(pesel, firstname, lastname, position, address, contact, gender, birthday, hire_date) FROM '/docker-entrypoint-initdb.d/data/staff.csv' DELIMITER ',' CSV HEADER;
 INSERT INTO deliverers(pesel) SELECT pesel FROM staff WHERE position='Deliverer';
+
+CREATE SCHEMA utils;
+CREATE SCHEMA tools;
+CREATE SCHEMA display;

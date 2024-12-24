@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION item_exist(p_name varchar, item_type varchar)
+CREATE OR REPLACE FUNCTION utils.item_exist(p_name varchar, item_type varchar)
 RETURNS BOOLEAN AS
 $$
 DECLARE
@@ -25,7 +25,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION find_item(p_name varchar, item_type varchar)
+CREATE OR REPLACE FUNCTION utils.find_item(p_name varchar, item_type varchar)
 RETURNS int AS
 $$
 DECLARE
@@ -51,7 +51,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION is_servable(p_dish_name varchar)
+CREATE OR REPLACE FUNCTION tools.is_servable(p_dish_name varchar)
 RETURNS boolean AS
 $$
 DECLARE
@@ -89,7 +89,7 @@ END;
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION list_all_additions()
+CREATE OR REPLACE FUNCTION display.list_all_additions()
 RETURNS SETOF RECORD AS
 $$
 DECLARE
@@ -111,7 +111,7 @@ END;
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION list_all_components()
+CREATE OR REPLACE FUNCTION display.list_all_components()
 RETURNS SETOF RECORD AS
 $$
 DECLARE
@@ -133,7 +133,7 @@ END;
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION list_client_orders(
+CREATE OR REPLACE FUNCTION display.list_client_orders(
     p_client varchar(11)
 )
 RETURNS TABLE (ord_id int, pay_meth int, deliv varchar, ordr_stat int, ord_at timestamp, last_update timestamp, client varchar, address_number int, cust_note text) AS
@@ -147,7 +147,7 @@ END;
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION new_address(p_address jsonb DEFAULT '[]'::jsonb)
+CREATE OR REPLACE FUNCTION tools.new_address(p_address jsonb DEFAULT '[]'::jsonb)
 RETURNS int AS
 $$
 DECLARE
@@ -180,7 +180,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION assign_deliverer_to_order(p_order_id int)
+CREATE OR REPLACE FUNCTION utils.assign_deliverer_to_order(p_order_id int)
 RETURNS void AS
 $$
 DECLARE
@@ -208,7 +208,7 @@ $$
 LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION update_order_status(p_order_id int)
+CREATE OR REPLACE FUNCTION tools.update_order_status(p_order_id int)
 RETURNS void AS
 $$
 DECLARE
@@ -247,9 +247,9 @@ BEGIN
         last_status_update = NOW()
     WHERE order_id = p_order_id;
 
-    -- If the new status is "IN DELIVERY", call assign_deliverer_to_order
+    -- If the new status is "IN DELIVERY", call utils.assign_deliverer_to_order
     IF next_status_name = 'IN DELIVERY' THEN
-        PERFORM assign_deliverer_to_order(p_order_id);  -- Call the deliverer assignment function
+        PERFORM utils.assign_deliverer_to_order(p_order_id);  -- Call the deliverer assignment function
     END IF;
 
     -- Confirm the status update
@@ -282,7 +282,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION order_sum(p_order_id int)
+CREATE OR REPLACE FUNCTION tools.order_sum(p_order_id int)
 RETURNS INT AS $$
 DECLARE
     total_addition int := 0;
