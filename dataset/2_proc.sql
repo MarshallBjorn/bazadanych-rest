@@ -167,7 +167,7 @@ BEGIN
             current_item := p_dishes->i->>'dish_name';
             quantity := (p_dishes->i->>'quantity')::int;
 
-            IF utils.item_exist(current_item,'DISH') AND is_servable(current_item) THEN
+            IF utils.item_exist(current_item,'DISH') AND tools.is_servable(current_item) THEN
                 INSERT INTO orders_dishes(dish_id, order_id, quantity)
                 VALUES (utils.find_item(current_item, 'DISH'), new_order_id, quantity);
             ELSE
@@ -178,7 +178,7 @@ BEGIN
     END IF;
 
     IF p_additions IS NOT NULL AND jsonb_array_length(p_additions) > 0 THEN
-        FOR i IN 0..(jsonb_array_elements(p_additions)-1) LOOP
+        FOR i IN 0..(jsonb_array_length(p_additions)-1) LOOP
             current_item := p_additions->i->>'addition_name';
             quantity := (p_additions->i->>'quantity')::int;
 

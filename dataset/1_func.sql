@@ -283,22 +283,22 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION tools.order_sum(p_order_id int)
-RETURNS INT AS $$
+RETURNS numeric AS $$
 DECLARE
-    total_addition int := 0;
-    total_dish int := 0;
-    total_price int := 0;
+    total_addition numeric := 0;
+    total_dish numeric := 0;
+    total_price numeric := 0;
 BEGIN
-    SELECT COALESCE(SUM(d.quantity * d.price), 0)
+    SELECT COALESCE(SUM(od.quantity * d.price), 0)
     INTO total_dish
     FROM orders_dishes od
     JOIN dishes d ON od.dish_id = d.dish_id
     WHERE od.order_id = p_order_id;
 
-    SELECT COALESCE(SUM(a.quantity * a.price), 0)
+    SELECT COALESCE(SUM(oa.quantity * a.price), 0)
     INTO total_addition
     FROM orders_additions oa
-    JOIN additions a ON oa.addtion_id = a.addtion_id
+    JOIN additions a ON oa.addition_id = a.addition_id
     WHERE oa.order_id = p_order_id;
 
     total_price := total_addition + total_dish;
