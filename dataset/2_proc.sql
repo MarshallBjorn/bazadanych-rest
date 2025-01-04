@@ -29,6 +29,7 @@ BEGIN
     INSERT INTO dishes (dish_name, dish_type, price, description)
     VALUES (p_dish_name, p_dish_type, p_price, p_description)
     RETURNING dish_id INTO new_dish_id;
+    CALL tools.item_soft_toggle(p_dish_name, 'DISH');
 
     -- Insert components if any are provided
     IF p_components IS NOT NULL AND jsonb_array_length(p_components) > 0 THEN
@@ -129,6 +130,80 @@ BEGIN
             RAISE EXCEPTION 'Unknown type: %', p_type;
     END CASE;
     RAISE NOTICE 'Item % of the % type has been successfuly toggled.', p_name, p_type;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE tools.update_item_price (
+    p_name varchar,
+    p_type varchar,
+    p_price numeric
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    item_number int;
+BEGIN
+    item_number := utils.find_item(p_name, p_type);
+    CASE
+        WHEN p_type = 'DISH' THEN
+            UPDATE dishes SET price = p_price WHERE dish_id = item_number;
+        WHEN p_type = 'COMPONENT' THEN
+            UPDATE components SET price = p_price WHERE component_id = item_number;
+        WHEN p_type = 'ADDITION' THEN
+            UPDATE additions SET price = p_price WHERE addition_id = item_number;
+        ELSE
+            RAISE EXCEPTION 'Unknown type: %', p_type;
+    END CASE;        
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE tools.update_item_name (
+    p_name varchar,
+    p_type varchar,
+    p_new_name varchar
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    item_number int;
+BEGIN
+    item_number := utils.find_item(p_name, p_type);
+    CASE
+        WHEN p_type = 'DISH' THEN
+            UPDATE dishes SET dish_name = p_new_name WHERE dish_id = item_number;
+        WHEN p_type = 'COMPONENT' THEN
+            UPDATE components SET component_name = p_new_name WHERE component_id = item_number;
+        WHEN p_type = 'ADDITION' THEN
+            UPDATE additions SET addition_name = p_new_name WHERE addition_id = item_number;
+        WHEN p_type = 'PROVIDER' THEN
+            UPDATE providers SET prod_name = p_new_name WHERE prod_id = item_number;
+        ELSE
+            RAISE EXCEPTION 'Unknown item type: %', p_type;
+    END CASE;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE tools.update_staff_name (
+    p_pesel varchar,
+    p_firstname varchar,
+    p_lastname varchar
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    staff_pesel varchar;
+BEGIN
+    SELECT pesel INTO staff_pesel FROM staff WHERE pesel = p_pesel;
+
+    IF staff_pesel IS NULL THEN
+        RAISE EXCEPTION 'Staff member "%" has not been found', p_pesel;
+    END IF;
+
+    UPDATE staff SET firstname = p_firstname WHERE pesel = p_pesel;
+    UPDATE staff SET lastname = p_lastname WHERE pesel = p_pesel;
 END;
 $$;
 

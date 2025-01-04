@@ -34,7 +34,7 @@
                     <?php 
                     include './database/config.php';
 
-                    $query = "SELECT * FROM list_all_dishes() AS t(dish_name VARCHAR, dish_type VARCHAR, price NUMERIC, is_served boolean, description TEXT)";
+                    $query = "SELECT * FROM display.list_all_dishes() AS t(dish_name VARCHAR, dish_type VARCHAR, price NUMERIC, is_served boolean, description TEXT)";
                     $result = pg_query($db, $query);
 
                     if(!$result) {

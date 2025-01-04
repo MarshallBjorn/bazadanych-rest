@@ -62,7 +62,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION list_all_dishes()
+CREATE OR REPLACE FUNCTION display.list_all_dishes()
 RETURNS SETOF RECORD AS
 $$
 DECLARE
