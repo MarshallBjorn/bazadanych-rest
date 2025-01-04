@@ -51,6 +51,21 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION utils.find_item_alt(p_name varchar)
+RETURNS varchar AS
+$$
+DECLARE
+    psl varchar;
+BEGIN
+    SELECT pesel INTO psl FROM staff WHERE pesel = p_name;
+
+    IF psl IS NULL THEN
+        RAISE EXCEPTION 'Unknown item of name:"%"', p_name;
+    END IF;
+    RETURN psl;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION tools.is_servable(p_dish_name varchar)
 RETURNS boolean AS
 $$

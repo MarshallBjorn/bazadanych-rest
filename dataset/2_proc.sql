@@ -207,6 +207,33 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE PROCEDURE tools.update_item_address (
+    p_item varchar,
+    p_type varchar,
+    p_address jsonb DEFAULT '[]'::jsonb
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    item_number int;
+    staff_number varchar;
+    address_number int;
+BEGIN
+    address_number := tools.new_address(p_address);
+
+    IF p_type = 'PROVIDER' THEN
+        item_number := utils.find_item(p_item, p_type);
+        UPDATE providers SET address = address_number WHERE prod_id = item_number;
+    ELSIF p_type = 'STAFF' THEN
+        staff_number := utils.find_item_alt(p_item);
+        UPDATE staff SET address = address_number WHERE pesel = staff_number;
+    ELSE
+        RETURN;
+    END IF;
+END;
+$$;
+
 CREATE OR REPLACE PROCEDURE tools.create_new_order (
     p_payment_method_name varchar,
     p_client_contact varchar,
