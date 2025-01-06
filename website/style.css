@@ -1,13 +1,17 @@
-/* Login page */
+/* Ogólne */
 @import url('https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 body {
-    font-family: "PT Sans";
+    font-family: "PT Sans", sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    color: #333;
 }
 
+/* Login Page */
 #page {
-    height: 100%;
-    width: 100%;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -15,137 +19,269 @@ body {
 }
 
 #form-container {
-    height: 300px;
-    width: 400px;
-    padding: 10px;
-    border: 1px solid black;
+    height: auto;
+    width: 90%;
+    max-width: 400px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 #form-container h2 {
     text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
 }
 
 #login-form {
     display: flex;
     flex-direction: column;
+    gap: 15px;
 }
 
 #login-form input {
-    height: 50px;
-    margin-bottom: 5%;
-    font-size: 25px;
+    height: 45px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 #login-form button {
     height: 50px;
-    width: 100px;
-    align-self: center;
+    font-size: 18px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#login-form button:hover {
+    background-color: #0056b3;
 }
 
 #error {
     color: red;
+    text-align: center;
 }
 
-/* App 'dishes  list' */
-
+/* App */
 #app {
-    height: 100%;
-    width: 100%;
     display: flex;
     flex-direction: row;
-    border: 1px solid black;
+    min-height: 100vh;
+    border: 1px solid #ddd;
+    background-color: #fff;
 }
 
+/* Side Panel */
 #side-panel {
-    height: 100%;
-    width: 300px;
+    width: 250px;
     display: flex;
     flex-direction: column;
+    background-color: #f8f9fa;
+    border-right: 1px solid #ddd;
+    padding: 15px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
 #side-panel button {
-    height: 60px;
+    height: 50px;
+    margin-bottom: 10px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
+
+#side-panel button:hover {
+    background-color: #0056b3;
+}
+
 #account {
     display: flex;
     flex-direction: row;
     align-items: center;
+    margin-bottom: 20px;
 }
 
 #account img {
-    width: 45px;
+    width: 50px;
     height: 50px;
-    margin-left: 20px;
-}
-
-#content {
-    flex-grow: 1;
-}
-
-#account {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    height: 80px;
-    background-color: bisque;
+    margin-right: 10px;
+    border-radius: 50%;
+    border: 2px solid #007BFF;
 }
 
 #date-div {
-    height: 50px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: bisque;
-    margin-top: auto
-
+    margin-top: auto;
+    text-align: center;
 }
 
 #date-div p {
-    margin: 0;
+    margin: 5px 0;
+    font-size: 14px;
+    color: #666;
 }
 
-button:nth-last-of-type() {
-    margin-top: auto;
+/* Content */
+#content {
+    flex-grow: 1;
+    padding: 20px;
 }
 
-.item {
-    height: 40px;
-    width: 70%;
-    background-color: antiquewhite;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 10px;
-    justify-content: space-between;
-}
-
+/* Items List */
 #item-list {
     display: flex;
     flex-direction: column;
+    gap: 15px;
     align-items: center;
-    margin-top: 20px;
+}
+
+.item {
+    width: 100%;
+    max-width: 800px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .item p {
-    display: inline-flex;
-    flex-direction: row;
+    margin: 0;
+    font-size: 14px;
 }
 
-/* App 'new dish' */
+.item button {
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
 
+.item button:hover {
+    background-color: #0056b3;
+}
+
+/* Dish Add */
 #dish-add {
-    padding-left: 50px;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: none;
 }
 
 #dish-add form {
     display: flex;
     flex-direction: column;
+    gap: 15px;
 }
 
-#dish-add form input,textarea {
-    width: 300px;
+#dish-add form input,
+#dish-add form textarea {
+    width: 100%;
+    max-width: 500px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 #dish-add form button {
-    width: 150px;
+    align-self: flex-start;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#dish-add form button:hover {
+    background-color: #0056b3;
+}
+
+/* Order List */
+#order-list {
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+.order-item {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.order-element {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+.order-item button {
+    margin-top: 10px;
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.order-item button:hover {
+    background-color: #0056b3;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    #app {
+        flex-direction: column;
+    }
+
+    #side-panel {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+
+    #side-panel button {
+        width: 45%;
+        margin-bottom: 10px;
+    }
+
+    #content {
+        padding: 10px;
+    }
+
+    .item,
+    .order-item {
+        width: 100%;
+    }
 }

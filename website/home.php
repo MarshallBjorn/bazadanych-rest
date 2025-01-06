@@ -9,6 +9,8 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="style.css">
         <script type="text/javascript" src="scripts/getDate.js"></script>
+        <script type="text/javascript" src="scripts/changeViews.js" defer></script>
+        <script type="text/javascript" src="scripts/logout.js"></script>
     </head>
     <body>
         <div id="app">
@@ -17,12 +19,12 @@
                     <img src="image/avatar.png" alt="avatar">
                     <p>Zalogowany: <?php echo $_SESSION['logged']; ?></p>
                 </div>
-                <button type="button" onclick="changeView()">Nowe zamówienie</button>
-                <button type="button">Aktualne zamówienia</button>
-                <button type="button" onclick="changeView()">Nowe danie</button>
-                <button type="button">Lista dań</button>
+                <button type="button">Nowe zamówienie</button>
+                <button type="button" onclick="changeView('order-list')">Aktualne zamówienia</button>
+                <button type="button" onclick="changeView('dish-add')">Nowe danie</button>
+                <button type="button" onclick="changeView('item-list')">Lista dań</button>
                 <button type="button">Pracownicy</button>
-                <button type="button">Wyloguj</button>
+                <button type="button" onclick="logout()">Wyloguj</button>
                 <div id="date-div">
                     <p id="date"></p>
                     <p id="time"></p>
@@ -35,9 +37,11 @@
                     include './database/config.php';
 
                     $query = "SELECT * FROM display.list_all_dishes() AS t(dish_name VARCHAR, dish_type VARCHAR, price NUMERIC, is_served boolean, description TEXT)";
+                    $query2 = "SELECT * FROM display.list_all_additions() AS t(addition_name VARCHAR, price NUMERIC, availability boolean)";
                     $result = pg_query($db, $query);
+                    $result2 = pg_query($db, $query2);
 
-                    if(!$result) {
+                    if(!$result || !$result2) {
                         echo "Wystąpił błąd podczas przetwarzania żądania" . pg_last_error($db);
                         exit;
                     }
@@ -47,30 +51,81 @@
                         echo "<p class=item-element> $row[dish_name]</p>". 
                             "<p class=item-element> $row[dish_type]</p>". 
                             "<p class=item-element> $row[price]</p>".
-                            "<p class=item-element> $row[description]</p>".
-                            "<p class=item-element> $row[is_served]</p>";
+                            "<p class=item-element> $row[description]</p>";
+                            if($row["is_served"] == 't') {
+                            echo "<p class=item-element>dostępne</p>";
+                            }
                         echo "<button type=button> Edytuj </button>";
                         echo "</div>";
                     }
+                    
+                    echo "<h2>Wszystkie dodatki</h2>";
+
+                    while ($row = pg_fetch_assoc($result2)) {
+                        echo "<div class='item'>";
+                        echo "<p class=item-element> $row[addition_name]</p>".  
+                            "<p class=item-element> $row[price]</p>".
+                            "<p class=item-element> $row[availability]</p>";
+                        echo "<button type=button> Edytuj </button>";
+                        echo "</div>";
+                    }
+
                     ?>
                 </div>
 
                 <div id="dish-add">
                     <h2>Nowe danie</h2>
-                    <form action="" method="">
-                        <label>Nazwa dania*</label>
-                        <input/>
-                        <label>Typ dania*</label>
-                        <input/>
-                        <label>Cena*</label>
-                        <input/>
-                        <label>Opis dania*</label>
-                        <textarea></textarea>
-                        <label>Składniki</label>
-                        <input/>
-                        <button type="button">Dodaj danie</button>
+                    <form action="./controller/addDishHandler.php" method="POST">
+                    <label for="dish_name">Nazwa dania*</label>
+                    <input type="text" id="dish_name" name="dish_name" required />
+
+                    <label for="dish_type">Typ dania*</label>
+                    <input type="text" id="dish_type" name="dish_type" required />
+
+                    <label for="price">Cena*</label>
+                    <input type="number" id="price" name="price" step="0.01" required />
+
+                    <label for="description">Opis dania*</label>
+                    <textarea id="description" name="description" required></textarea>
+
+                    <label for="components">Składniki (opcjonalnie)</label>
+                    <input type="text" id="components" name="components" />
+
+                    <label for="additions">Dodatki (opcjonalnie)</label>
+                    <input type="text" id="additions" name="additions" />
+
+                    <button type="submit">Dodaj danie</button>
                     </form>
 
+                </div>
+
+                <div id="employee-list">
+                </div>
+
+                <div id="order-list">
+                    <h2>Zamówienia</h2>
+                <?php
+                    $query = "SELECT * FROM display.list_client_orders($1)";
+                    $result = pg_query_params($db, $query, [$client_contact]);
+
+                    if (!$result) {
+                        echo "Wystąpił błąd podczas pobierania zamówień: " . pg_last_error($db);
+                        exit;
+                    }
+
+                    while ($row = pg_fetch_assoc($result)) {
+                        echo "<p class='order-element'><strong>ID zamówienia:</strong> {$row['ord_id']}</p>";
+                        echo "<p class='order-element'><strong>Metoda płatności:</strong> {$row['pay_meth']}</p>";
+                        echo "<p class='order-element'><strong>Dostawca:</strong> {$row['deliv']}</p>";
+                        echo "<p class='order-element'><strong>Status zamówienia:</strong> {$row['ordr_stat']}</p>";
+                        echo "<p class='order-element'><strong>Data zamówienia:</strong> {$row['ord_at']}</p>";
+                        echo "<p class='order-element'><strong>Ostatnia aktualizacja:</strong> {$row['last_update']}</p>";
+                        echo "<p class='order-element'><strong>Klient:</strong> {$row['client']}</p>";
+                        echo "<p class='order-element'><strong>Numer adresu:</strong> {$row['address_number']}</p>";
+                        echo "<p class='order-element'><strong>Notatka klienta:</strong> {$row['cust_note']}</p>";
+                        echo "<button type='button' onclick='editOrder({$row['ord_id']})'>Edytuj</button>";
+                    }
+                    ?>
                 </div>
             </div>
         </div>

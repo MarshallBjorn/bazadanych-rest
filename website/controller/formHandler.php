@@ -1,4 +1,4 @@
-<?php 
+<?php
     include '../database/config.php';
 
     $loginID = $_POST['login'];

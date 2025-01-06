@@ -108,7 +108,7 @@ CREATE OR REPLACE FUNCTION display.list_all_additions()
 RETURNS SETOF RECORD AS
 $$
 DECLARE
-    addition_cursor CURSOR FOR SELECT addition_name, provider, price FROM additions WHERE availability = TRUE;
+    addition_cursor CURSOR FOR SELECT addition_name, price, availability FROM additions;
     result_record RECORD;
 BEGIN
     OPEN addition_cursor;
