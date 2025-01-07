@@ -24,7 +24,7 @@
                 <button type="button" onclick="changeView('order-list')">Aktualne zamówienia</button>
                 <button type="button" onclick="changeView('dish-add')">Nowe danie</button>
                 <button type="button" onclick="changeView('item-list')">Lista dań</button>
-                <button type="button">Pracownicy</button>
+                <button type="button" onclick="changeView('employee-list')">Pracownicy</button>
                 <button type="button" onclick="logout()">Wyloguj</button>
                 <div id="date-div">
                     <p id="date"></p>
@@ -123,6 +123,31 @@
                 </div>
 
                 <div id="employee-list">
+                <?php 
+                    $query = "SELECT * FROM display.list_staff()";
+    
+                    $result = pg_query($db, $query);
+
+                    if(!$result) {
+                        echo "Wystąpił błąd podczas przetwarzania żądania" . pg_last_error($db);
+                        exit;
+                    }
+
+                    while ($row = pg_fetch_assoc($result)) {
+                        echo "<div class='item'>";
+                        echo "<p class=staff-item-element> $row[staff_id]</p>".  
+                            "<p class=staff-item-element> $row[fname]</p>".
+                            "<p class=staff-item-element> $row[lname]</p>".
+                            "<p class=staff-item-element> $row[fposition]</p>".
+                            "<p class=staff-item-element> $row[fcontact]</p>".
+                            "<p class=staff-item-element> $row[fgender]</p>".
+                            "<p class=staff-item-element> $row[fbirthday]</p>".
+                            "<p class=staff-item-element> $row[fhire_date]</p>".
+                            "<p class=staff-item-element> $row[fstatus]</p>";
+                        echo "<button type=button> Edytuj </button>";
+                        echo "</div>";
+                    }
+                    ?>
                 </div>
 
                 <div id="order-list">
