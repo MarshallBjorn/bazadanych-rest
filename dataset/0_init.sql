@@ -24,6 +24,7 @@ CREATE TABLE "staff" (
     "contact" varchar(11) UNIQUE NOT NULL,
     "gender" boolean NOT NULL,
     "birthday" date NOT NULL,
+    "status" boolean NOT NULL DEFAULT TRUE,
     "hire_date" date NOT NULL DEFAULT NOW(),
     FOREIGN KEY ("address") REFERENCES "addresses"("address_id") ON DELETE CASCADE
 );
@@ -117,7 +118,8 @@ CREATE TABLE "orders" (
     "last_status_update" timestamp NOT NULL DEFAULT NOW(),
     "client_contact" varchar(11) NOT NULL,
     "address" int NOT NULL, 
-    "note" text, 
+    "note" text,
+    "summary" decimal(6, 2),
     FOREIGN KEY("deliverer") REFERENCES "deliverers"("pesel"),
     FOREIGN KEY("payment_method") REFERENCES "payment_methods"("payment_method_id"),
     FOREIGN KEY("address") REFERENCES "addresses"("address_id"),
