@@ -185,6 +185,56 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE PROCEDURE tools.update_dish(
+    p_name varchar,
+    p_new_name varchar,
+    p_type varchar,
+    p_price numeric,
+    p_description text
+) LANGUAGE plpgsql
+AS $$
+DECLARE
+    item_number int;
+BEGIN
+    item_number := utils.find_item(p_name, 'DISH');
+    
+    UPDATE dishes SET 
+    dish_name = p_new_name,
+    dish_type = p_type,
+    price = p_price,
+    "description" = p_description
+    WHERE item_number = dish_id;
+    
+    RAISE NOTICE 'Item has been updated.';
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE tools.update_staff(
+    p_pesel varchar,
+    p_new_firstname varchar,
+    p_new_lastname varchar,
+    p_position varchar,
+    p_contact varchar,
+    p_gender boolean,
+    p_birthday date
+) LANGUAGE plpgsql AS $$
+DECLARE
+    staff_id varchar;
+BEGIN
+    staff_id := utils.find_item_alt(p_pesel);
+
+    UPDATE staff SET
+    firstname = p_new_firstname,
+    lastname = p_new_lastname,
+    position = p_position,
+    contact = p_contact,
+    gender = p_gender,
+    birthday = p_birthday
+    WHERE pesel = staff_id;
+    RAISE NOTICE 'Person info has been updated.';
+END;
+$$;
+
 CREATE OR REPLACE PROCEDURE tools.update_staff_name (
     p_pesel varchar,
     p_firstname varchar,
@@ -441,3 +491,4 @@ BEGIN
     RAISE NOTICE 'Staff member "%" added successfully.', p_firstname || ' ' || p_lastname;
 END;
 $$;
+
