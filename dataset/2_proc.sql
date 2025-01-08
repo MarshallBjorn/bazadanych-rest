@@ -301,6 +301,7 @@ DECLARE
     new_order_id int;
     current_item varchar;
     quantity int;
+    summ numeric;
     do_exists boolean;
 BEGIN
     SELECT payment_method_id INTO current_payment_method FROM payment_methods WHERE p_payment_method_name = method;
@@ -343,6 +344,8 @@ BEGIN
             END IF;
         END LOOP;
     END IF;
+    summ := tools.order_sum(new_order_id);
+    UPDATE orders SET summary = summ WHERE new_order_id = order_id;
 END;
 $$;
 

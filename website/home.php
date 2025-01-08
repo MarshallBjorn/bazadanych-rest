@@ -11,6 +11,7 @@
         <script type="text/javascript" src="scripts/getDate.js"></script>
         <script type="text/javascript" src="scripts/changeViews.js" defer></script>
         <script type="text/javascript" src="scripts/logout.js"></script>
+        <script type="text/javascript" src="scripts/dataEdit.js"></script>
     </head>
     <body>
         <div id="app">
@@ -23,7 +24,7 @@
                 <button type="button" onclick="changeView('order-list')">Aktualne zamówienia</button>
                 <button type="button" onclick="changeView('dish-add')">Nowe danie</button>
                 <button type="button" onclick="changeView('item-list')">Lista dań</button>
-                <button type="button">Pracownicy</button>
+                <button type="button" onclick="changeView('employee-list')">Pracownicy</button>
                 <button type="button" onclick="logout()">Wyloguj</button>
                 <div id="date-div">
                     <p id="date"></p>
@@ -48,14 +49,36 @@
 
                     while ($row = pg_fetch_assoc($result)) {
                         echo "<div class='item'>";
-                        echo "<p class=item-element> $row[dish_name]</p>". 
-                            "<p class=item-element> $row[dish_type]</p>". 
-                            "<p class=item-element> $row[price]</p>".
-                            "<p class=item-element> $row[description]</p>";
-                            if($row["is_served"] == 't') {
-                            echo "<p class=item-element>dostępne</p>";
-                            }
-                        echo "<button type=button> Edytuj </button>";
+                        echo "<p class='item-element'><strong>Nazwa:</strong> {$row['dish_name']}</p>";
+                        echo "<p class='item-element'><strong>Typ:</strong> {$row['dish_type']}</p>";
+                        echo "<p class='item-element'><strong>Cena:</strong> {$row['price']}</p>";
+                        echo "<p class='item-element'><strong>Opis:</strong> {$row['description']}</p>";
+                        echo "<p class='item-element'><strong>Dostępne:</strong> " . ($row['is_served'] == 't' ? 'Tak' : 'Nie') . "</p>";
+                        echo "<button type='button' onclick='toggleEditSection(this)'>Edytuj</button>";
+
+                        echo "<div class='edit-section'>";
+                        echo "<form onsubmit='event.preventDefault(); saveDish(this.querySelector(\"button[type=\\'submit\\']\"));'>";
+                        echo "<label for='edit-name'>Nazwa:</label>";
+                        echo "<input type='text' id='edit-name' name='dish_name' value='{$row['dish_name']}' required />";
+
+                        echo "<label for='edit-type'>Typ:</label>";
+                        echo "<input type='text' id='edit-type' name='dish_type' value='{$row['dish_type']}' required />";
+
+                        echo "<label for='edit-price'>Cena:</label>";
+                        echo "<input type='number' id='edit-price' name='price' value='{$row['price']}' step='0.01' required />";
+
+                        echo "<label for='edit-description'>Opis:</label>";
+                        echo "<textarea id='edit-description' name='description' required>{$row['description']}</textarea>";
+
+                        echo "<label for='edit-served'>Dostępne:</label>";
+                        echo "<select id='edit-served' name='is_served'>";
+                        echo "<option value='t'" . ($row['is_served'] == 't' ? ' selected' : '') . ">Tak</option>";
+                        echo "<option value='f'" . ($row['is_served'] == 'f' ? ' selected' : '') . ">Nie</option>";
+                        echo "</select>";
+
+                        echo "<button type='submit'>Zapisz</button>";
+                        echo "</form>";
+                        echo "</div>";
                         echo "</div>";
                     }
                     
@@ -100,6 +123,31 @@
                 </div>
 
                 <div id="employee-list">
+                <?php 
+                    $query = "SELECT * FROM display.list_staff()";
+    
+                    $result = pg_query($db, $query);
+
+                    if(!$result) {
+                        echo "Wystąpił błąd podczas przetwarzania żądania" . pg_last_error($db);
+                        exit;
+                    }
+
+                    while ($row = pg_fetch_assoc($result)) {
+                        echo "<div class='item'>";
+                        echo "<p class=staff-item-element> $row[staff_id]</p>".  
+                            "<p class=staff-item-element> $row[fname]</p>".
+                            "<p class=staff-item-element> $row[lname]</p>".
+                            "<p class=staff-item-element> $row[fposition]</p>".
+                            "<p class=staff-item-element> $row[fcontact]</p>".
+                            "<p class=staff-item-element> $row[fgender]</p>".
+                            "<p class=staff-item-element> $row[fbirthday]</p>".
+                            "<p class=staff-item-element> $row[fhire_date]</p>".
+                            "<p class=staff-item-element> $row[fstatus]</p>";
+                        echo "<button type=button> Edytuj </button>";
+                        echo "</div>";
+                    }
+                    ?>
                 </div>
 
                 <div id="order-list">

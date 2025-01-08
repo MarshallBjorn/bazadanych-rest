@@ -137,6 +137,7 @@ body {
 }
 
 /* Items List */
+
 #item-list {
     display: flex;
     flex-direction: column;
@@ -155,6 +156,8 @@ body {
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .item p {
@@ -175,6 +178,66 @@ body {
 
 .item button:hover {
     background-color: #0056b3;
+}
+
+.edit-section {
+    display: none;
+    margin-top: 10px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.edit-section label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.edit-section input,
+.edit-section textarea,
+.edit-section select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.edit-section button {
+    padding: 8px 15px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-section button:hover {
+    background-color: #45a049;
+}
+
+.edit-section form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.edit-section form label,
+.edit-section form input,
+.edit-section form textarea,
+.edit-section form select {
+    grid-column: span 2;
+}
+
+.edit-section button[type="submit"] {
+    grid-column: span 2;
+    justify-self: center;
 }
 
 /* Dish Add */
@@ -256,6 +319,13 @@ body {
 
 .order-item button:hover {
     background-color: #0056b3;
+}
+
+/* employee */
+
+#employee-list {
+    display: flex;
+    flex-direction: column;
 }
 
 /* Responsiveness */
