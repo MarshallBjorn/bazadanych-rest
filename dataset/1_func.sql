@@ -148,16 +148,13 @@ END;
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION display.list_client_orders(
-    p_client varchar(11)
-)
+CREATE OR REPLACE FUNCTION display.list_client_orders()
 RETURNS TABLE (ord_id int, pay_meth int, deliv varchar, ordr_stat int, ord_at timestamp, last_update timestamp, client varchar, address_number int, cust_note text) AS
 $$
 BEGIN
     RETURN QUERY
     SELECT order_id, payment_method, deliverer, order_status, ordered_at, last_status_update, client_contact, address, note
-    FROM orders
-    WHERE p_client = client_contact;
+    FROM orders;
 END;
 $$
 LANGUAGE plpgsql;
