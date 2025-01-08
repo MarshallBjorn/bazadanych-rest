@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
     
     if ($result) {
-        header("Location: index.php?alert=success");
+        header("Location: home.php?alert=success");
     } else {
         echo "Wystąpił błąd podczas dodawania dania: " . pg_last_error($db);
     }

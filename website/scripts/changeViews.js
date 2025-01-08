@@ -3,6 +3,8 @@ function changeView(view) {
     document.getElementById("dish-add").style.display = "none";
     document.getElementById("order-list").style.display = "none";
     document.getElementById("employee-list").style.display = "none";
+    document.getElementById("new-order").style.display = "none";
+
     switch (view) {
         case 'item-list':
             document.getElementById("item-list").style.display = "flex";
@@ -15,6 +17,9 @@ function changeView(view) {
             break;
         case 'employee-list':
             document.getElementById("employee-list").style.display = "flex";
+            break;
+        case 'new-order':
+            document.getElementById("new-order").style.display = "block";
             break;
         default:
             console.warn(`Nieznany widok: ${view}`);

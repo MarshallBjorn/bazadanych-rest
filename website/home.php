@@ -12,26 +12,53 @@
         <script type="text/javascript" src="scripts/changeViews.js" defer></script>
         <script type="text/javascript" src="scripts/logout.js"></script>
         <script type="text/javascript" src="scripts/dataEdit.js"></script>
+        <script type="text/javascript" src="scripts/newEmployeeAdd.js"></script>
     </head>
     <body>
         <div id="app">
             <div id="side-panel">
                 <div id="account">
                     <img src="image/avatar.png" alt="avatar">
-                    <p>Zalogowany: <?php echo $_SESSION['logged']; ?></p>
+                    <p>Zalogowany: <strong><?php echo $_SESSION['logged'];?></strong></p>
                 </div>
-                <button type="button">Nowe zamówienie</button>
-                <button type="button" onclick="changeView('order-list')">Aktualne zamówienia</button>
-                <button type="button" onclick="changeView('dish-add')">Nowe danie</button>
-                <button type="button" onclick="changeView('item-list')">Lista dań</button>
-                <button type="button" onclick="changeView('employee-list')">Pracownicy</button>
-                <button type="button" onclick="logout()">Wyloguj</button>
+                <div id="line"></div>
+                <button type="button" onclick="changeView('new-order')" class="menu">Nowe zamówienie</button>
+                <button type="button" onclick="changeView('order-list')" class="menu">Aktualne zamówienia</button>
+                <button type="button" onclick="changeView('dish-add')" class="menu">Nowe danie</button>
+                <button type="button" onclick="changeView('item-list')" class="menu">Lista dań</button>
+                <button type="button" onclick="changeView('employee-list')" class="menu">Pracownicy</button>
+                <button type="button" onclick="logout()" class="menu">Wyloguj</button>
                 <div id="date-div">
                     <p id="date"></p>
                     <p id="time"></p>
                 </div>
             </div>
             <div id="content">
+                <div id="new-order">
+                <h2>Nowe zamówienie</h2>
+                <form action="./controller/newOrderHandler.php" method="POST">
+                    <label for="payment_method_name">Metoda płatności*</label>
+                    <input type="text" id="payment_method_name" name="payment_method_name" required />
+
+                    <label for="client_contact">Kontakt klienta*</label>
+                    <input type="text" id="client_contact" name="client_contact" required />
+
+                    <label for="note">Notatka</label>
+                    <textarea id="note" name="note"></textarea>
+
+                    <label for="address">Adres (JSON)*</label>
+                    <input type="text" id="address" name="address" required />
+
+                    <label for="dishes">Dania (JSON)*</label>
+                    <textarea id="dishes" name="dishes" required></textarea>
+
+                    <label for="additions">Dodatki (JSON)</label>
+                    <textarea id="additions" name="additions"></textarea>
+
+                    <button type="submit">Dodaj zamówienie</button>
+                </form>
+                </div>
+
                 <div id="item-list">
                     <h2>Wszystkie dania</h2>
                     <?php 
@@ -86,10 +113,28 @@
 
                     while ($row = pg_fetch_assoc($result2)) {
                         echo "<div class='item'>";
-                        echo "<p class=item-element> $row[addition_name]</p>".  
-                            "<p class=item-element> $row[price]</p>".
-                            "<p class=item-element> $row[availability]</p>";
-                        echo "<button type=button> Edytuj </button>";
+                        echo "<p class=item-element><strong>Nazwa:</strong> $row[addition_name]</p>".  
+                            "<p class=item-element><strong>Cena:</strong> $row[price]</p>".
+                            "<p class=item-element><strong>Dostępne:</strong> ". ($row['availability'] == 't' ? 'Tak' : 'Nie') ."</p>";
+                        echo "<button type=button onclick='toggleEditSection(this)'> Edytuj </button>";
+
+                        echo "<div class='edit-section'>";
+                        echo "<form onsubmit='event.preventDefault(); saveDish(this.querySelector(\"button[type=\\'submit\\']\"));'>";
+                        echo "<label for='edit-name'>Nazwa:</label>";
+                        echo "<input type='text' id='edit-name' name='dish_name' value='{$row['addition_name']}' required />";
+
+                        echo "<label for='edit-type'>price:</label>";
+                        echo "<input type='text' id='edit-type' name='dish_type' value='{$row['price']}' required />";
+
+                        echo "<label for='edit-served'>Dostępne:</label>";
+                        echo "<select id='edit-served' name='is_served'>";
+                        echo "<option value='t'" . ($row['availability'] == 't' ? ' selected' : '') . ">Tak</option>";
+                        echo "<option value='f'" . ($row['availability'] == 'f' ? ' selected' : '') . ">Nie</option>";
+                        echo "</select>";
+
+                        echo "<button type='submit'>Zapisz</button>";
+                        echo "</form>";
+                        echo "</div>";
                         echo "</div>";
                     }
 
@@ -123,7 +168,32 @@
                 </div>
 
                 <div id="employee-list">
-                <?php 
+                    <h2>Pracownicy</h2>
+                    <div id="add-staff-container">
+                        <button id="add-staff-button">Dodaj nowego pracownika</button>
+                    </div>
+                    <div id="overlay" class="hidden"></div>
+                <div id="modal" class="hidden">
+                    <h2>Dodaj Pracownika</h2>
+                    <form id="add-staff-form">
+                        <label>PESEL: <input type="text" name="pesel" required></label><br><br>
+                        <label>Imię: <input type="text" name="firstname" required></label><br><br>
+                        <label>Nazwisko: <input type="text" name="lastname" required></label><br><br>
+                        <label>Stanowisko: <input type="text" name="position" required></label><br><br>
+                        <label>Adres (JSON): <input type="text" name="address" required></label><br><br>
+                        <label>Kontakt: <input type="text" name="contact" required></label><br><br>
+                        <label>Płeć: 
+                            <select name="gender">
+                                <option value="true">Mężczyzna</option>
+                                <option value="false">Kobieta</option>
+                            </select>
+                        </label><br><br>
+                        <label>Data urodzenia: <input type="date" name="birthday" required></label><br><br>
+                        <button type="submit">Zapisz</button>
+                        <button type="button" id="close-modal">Anuluj</button>
+                    </form>
+                </div>
+                    <?php 
                     $query = "SELECT * FROM display.list_staff()";
     
                     $result = pg_query($db, $query);
@@ -134,17 +204,17 @@
                     }
 
                     while ($row = pg_fetch_assoc($result)) {
-                        echo "<div class='item'>";
-                        echo "<p class=staff-item-element> $row[staff_id]</p>".  
-                            "<p class=staff-item-element> $row[fname]</p>".
-                            "<p class=staff-item-element> $row[lname]</p>".
-                            "<p class=staff-item-element> $row[fposition]</p>".
-                            "<p class=staff-item-element> $row[fcontact]</p>".
-                            "<p class=staff-item-element> $row[fgender]</p>".
-                            "<p class=staff-item-element> $row[fbirthday]</p>".
-                            "<p class=staff-item-element> $row[fhire_date]</p>".
-                            "<p class=staff-item-element> $row[fstatus]</p>";
-                        echo "<button type=button> Edytuj </button>";
+                        echo "<div class='staff-item'>";
+                        echo "<p class='staff-item-element'><strong>ID:</strong> {$row['staff_id']}</p>";
+                        echo "<p class='staff-item-element'><strong>Imię:</strong> {$row['fname']}</p>";
+                        echo "<p class='staff-item-element'><strong>Nazwisko:</strong> {$row['lname']}</p>";
+                        echo "<p class='staff-item-element'><strong>Stanowisko:</strong> {$row['fposition']}</p>";
+                        echo "<p class='staff-item-element'><strong>Kontakt:</strong> {$row['fcontact']}</p>";
+                        echo "<p class='staff-item-element'><strong>Płeć:</strong> {$row['fgender']}</p>";
+                        echo "<p class='staff-item-element'><strong>Data urodzenia:</strong> {$row['fbirthday']}</p>";
+                        echo "<p class='staff-item-element'><strong>Data zatrudnienia:</strong> {$row['fhire_date']}</p>";
+                        echo "<p class='staff-item-element'><strong>Status:</strong> {$row['fstatus']}</p>";
+                        echo "<button type='button'>Edytuj</button>";
                         echo "</div>";
                     }
                     ?>
@@ -153,8 +223,8 @@
                 <div id="order-list">
                     <h2>Zamówienia</h2>
                 <?php
-                    $query = "SELECT * FROM display.list_client_orders($1)";
-                    $result = pg_query_params($db, $query, [$client_contact]);
+                    $query = "SELECT * FROM display.list_client_orders()";
+                    $result = pg_query($db, $query);
 
                     if (!$result) {
                         echo "Wystąpił błąd podczas pobierania zamówień: " . pg_last_error($db);
