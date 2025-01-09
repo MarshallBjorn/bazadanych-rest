@@ -1,0 +1,6 @@
+order_id,payment_method,deliverer,order_status,ordered_at,last_status_update,client_contact,address,note,summary
+1,1,,1,2025-01-08 10:00:00,2025-01-08 10:00:00,12345678901,1,"First order note",120.50
+2,2,,1,2025-01-08 10:05:00,2025-01-08 10:05:00,23456789012,2,"Second order note",85.00
+3,3,,1,2025-01-08 10:10:00,2025-01-08 10:10:00,34567890123,3,"Third order note",95.75
+4,1,,1,2025-01-08 10:15:00,2025-01-08 10:15:00,45678901234,4,"Fourth order note",45.25
+5,2,,1,2025-01-08 10:20:00,2025-01-08 10:20:00,56789012345,5,"Fifth order note",60.00

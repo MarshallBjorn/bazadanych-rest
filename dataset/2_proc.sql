@@ -235,6 +235,20 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE PROCEDURE tools.update_addition(
+    p_addition_id int,
+    p_name varchar,
+    p_price numeric
+) LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE additoins SET
+    p_addition_name = addition_name,
+    p_price = price
+    WHERE addition_id = p_addition_id;
+    RAISE NOTICE 'Addition has been updated.';
+END;
+$$;
+
 CREATE OR REPLACE PROCEDURE tools.update_staff_name (
     p_pesel varchar,
     p_firstname varchar,
