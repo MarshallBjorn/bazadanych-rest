@@ -81,7 +81,7 @@ CREATE OR REPLACE FUNCTION display.list_all_dishes()
 RETURNS SETOF RECORD AS
 $$
 DECLARE
-    dish_cursor CURSOR FOR SELECT dish_name, dish_type, price, is_served, description FROM dishes;
+    dish_cursor CURSOR FOR SELECT dish_id, dish_name, dish_type, price, is_served, description FROM dishes;
     result_record RECORD;
 BEGIN
     -- Open the cursor

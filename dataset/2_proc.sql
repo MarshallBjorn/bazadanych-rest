@@ -186,24 +186,23 @@ END;
 $$;
 
 CREATE OR REPLACE PROCEDURE tools.update_dish(
-    p_name varchar,
+    p_dish_id INT,
     p_new_name varchar,
     p_type varchar,
     p_price numeric,
-    p_description text
+    p_description text,
+    p_is_served boolean
 ) LANGUAGE plpgsql
 AS $$
-DECLARE
-    item_number int;
 BEGIN
-    item_number := utils.find_item(p_name, 'DISH');
-    
-    UPDATE dishes SET 
+    UPDATE dishes 
+    SET 
     dish_name = p_new_name,
     dish_type = p_type,
     price = p_price,
-    "description" = p_description
-    WHERE item_number = dish_id;
+    "description" = p_description,
+    is_served = p_is_served
+    WHERE dish_id = p_dish_id;
     
     RAISE NOTICE 'Item has been updated.';
 END;
