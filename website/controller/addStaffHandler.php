@@ -13,7 +13,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $firstname = $_POST['firstname'];
     $lastname = $_POST['lastname'];
     $position = $_POST['position'];
-    $address = $_POST['address'];
+    $address = json_encode([
+        $_POST['street'],
+        $_POST['locality'],
+        $_POST['post_code'],
+        $_POST['building_num']
+    ]);
     $contact = $_POST['contact'];
     $gender = $_POST['gender'] === 'true';
     $birthday = $_POST['birthday'];
@@ -24,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     ]);
 
     if ($result) {
-        header("Location: home.php");
+        header("Location: ../home.php");
     } else {
         echo "Błąd: " . pg_last_error($db);
     }

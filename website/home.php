@@ -3,6 +3,11 @@
     {
         header("Location:index.html"); 
     }
+
+    if (isset($_SESSION['message'])) {
+        echo "<script>alert('$_SESSION[message]');</script>";
+        unset($_SESSION['message']);
+    }
 ?>
 <html>
     <head>
@@ -13,6 +18,7 @@
         <script type="text/javascript" src="scripts/logout.js"></script>
         <script type="text/javascript" src="scripts/dataEdit.js"></script>
         <script type="text/javascript" src="scripts/newEmployeeAdd.js"></script>
+        <script type="text/javascript" src="scripts/editDish.js"></script>
     </head>
     <body>
         <div id="app">
@@ -64,7 +70,7 @@
                     <?php 
                     include './database/config.php';
 
-                    $query = "SELECT * FROM display.list_all_dishes() AS t(dish_name VARCHAR, dish_type VARCHAR, price NUMERIC, is_served boolean, description TEXT)";
+                    $query = "SELECT * FROM display.list_all_dishes() AS t(dish_id INT, dish_name VARCHAR, dish_type VARCHAR, price NUMERIC, is_served boolean, description TEXT)";
                     $query2 = "SELECT * FROM display.list_all_additions() AS t(addition_name VARCHAR, price NUMERIC, availability boolean)";
                     $result = pg_query($db, $query);
                     $result2 = pg_query($db, $query2);
@@ -76,6 +82,7 @@
 
                     while ($row = pg_fetch_assoc($result)) {
                         echo "<div class='item'>";
+                        echo "<p class='item-element'><strong>ID:</strong> {$row['dish_id']}</p>";
                         echo "<p class='item-element'><strong>Nazwa:</strong> {$row['dish_name']}</p>";
                         echo "<p class='item-element'><strong>Typ:</strong> {$row['dish_type']}</p>";
                         echo "<p class='item-element'><strong>Cena:</strong> {$row['price']}</p>";
@@ -84,7 +91,10 @@
                         echo "<button type='button' onclick='toggleEditSection(this)'>Edytuj</button>";
 
                         echo "<div class='edit-section'>";
-                        echo "<form onsubmit='event.preventDefault(); saveDish(this.querySelector(\"button[type=\\'submit\\']\"));'>";
+                        echo "<form method='POST' action='./controller/editDishHandler.php'>";
+
+                        echo "<input type='hidden' id='edit-name' name='dish_id' value='{$row['dish_id']}'/>";
+
                         echo "<label for='edit-name'>Nazwa:</label>";
                         echo "<input type='text' id='edit-name' name='dish_name' value='{$row['dish_name']}' required />";
 
@@ -175,13 +185,16 @@
                     <div id="overlay" class="hidden"></div>
                 <div id="modal" class="hidden">
                     <h2>Dodaj Pracownika</h2>
-                    <form id="add-staff-form">
+                    <form id="add-staff-form" method="POST" action="./controller/addStaffHandler.php">
                         <label>PESEL: <input type="text" name="pesel" required></label><br><br>
                         <label>Imię: <input type="text" name="firstname" required></label><br><br>
                         <label>Nazwisko: <input type="text" name="lastname" required></label><br><br>
                         <label>Stanowisko: <input type="text" name="position" required></label><br><br>
-                        <label>Adres (JSON): <input type="text" name="address" required></label><br><br>
-                        <label>Kontakt: <input type="text" name="contact" required></label><br><br>
+                        <label>Ulica: <input type="text" name="street" required></label><br><br>
+                        <label>Miasto: <input type="text" name="locality" required></label><br><br>
+                        <label>Kod pocztowy: <input type="text" name="post_code" required></label><br><br>
+                        <label>Numer budynku: <input type="text" name="building_num" required></label><br><br>
+                        <label>Telefon: <input type="text" name="contact" required></label><br><br>
                         <label>Płeć: 
                             <select name="gender">
                                 <option value="true">Mężczyzna</option>
