@@ -1,0 +1,32 @@
+[
+    {
+        "dish_name": "Spaghetti Carbonara",
+        "dish_type": "Pasta",
+        "price": 12.99,
+        "description": "Classic Italian pasta with creamy sauce"
+    },
+    {
+        "dish_name": "Margherita Pizza",
+        "dish_type": "Pizza",
+        "price": 10.5,
+        "description": "Traditional pizza with tomato, mozzarella, and basil"
+    },
+    {
+        "dish_name": "Caesar Salad",
+        "dish_type": "Salad",
+        "price": 8.75,
+        "description": "Salad with romaine, croutons, and Caesar dressing"
+    },
+    {
+        "dish_name": "Beef Burger",
+        "dish_type": "Sandwich",
+        "price": 11.25,
+        "description": "Burger with beef patty, lettuce, and tomato"
+    },
+    {
+        "dish_name": "Grilled Salmon",
+        "dish_type": "Seafood",
+        "price": 15.0,
+        "description": "Salmon fillet grilled to perfection"
+    }
+]

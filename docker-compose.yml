@@ -23,6 +23,17 @@ services:
     depends_on:
       - postgres
       
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_container
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./containers-data/mongodb:/data/db
+
   php-apache:
     build: .
     container_name: php_apache_container

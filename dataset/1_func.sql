@@ -160,11 +160,11 @@ $$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION display.list_staff()
-RETURNS TABLE (staff_id varchar, fname varchar, lname varchar, fposition varchar, fcontact varchar, fgender boolean, fbirthday date, fhire_date date, fstatus boolean) AS
+RETURNS TABLE (staff_id varchar, fname varchar, lname varchar, fposition varchar, fcontact varchar, fgender boolean, fbirthday date, fhire_date date, fstatus text) AS
 $$
 BEGIN
     RETURN QUERY
-    SELECT pesel, firstname, lastname, position, contact, gender, birthday, hire_date, status
+    SELECT pesel, firstname, lastname, position, contact, gender, birthday, hire_date, "status"
     FROM staff;
 END;
 $$
