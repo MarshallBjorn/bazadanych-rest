@@ -1,0 +1,6 @@
+"addition_id","addition_name","provider","price","availability"
+1,"Ketchup",1,"0.20",True
+2,"Mayonnaise",2,"0.25",True
+3,"Cheese Slice",3,"0.50",True
+4,"Garlic Sauce",2,"0.40",True
+5,"Olive Oil",1,"0.30",True

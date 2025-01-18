@@ -1,0 +1,153 @@
+[
+    {
+        "dish_id": 1,
+        "dish_name": "Spaghetti Carbonara",
+        "dish_type": "Pasta",
+        "price": 12.99,
+        "description": "Classic Italian pasta with creamy sauce",
+        "is_served": true,
+        "components": [
+            {
+                "component_id": 8,
+                "component_name": "Cream Sauce",
+                "quantity": 1,
+                "price": 1.25,
+                "availability": true
+            },
+            {
+                "component_id": 1,
+                "component_name": "Tomato Sauce",
+                "quantity": 2,
+                "price": 1.5,
+                "availability": true
+            }
+        ],
+        "additions": [
+            {
+                "addition_id": 4,
+                "addition_name": "Garlic Sauce",
+                "price": 0.4,
+                "availability": true
+            }
+        ]
+    },
+    {
+        "dish_id": 2,
+        "dish_name": "Margherita Pizza",
+        "dish_type": "Pizza",
+        "price": 10.5,
+        "description": "Traditional pizza with tomato, mozzarella, and basil",
+        "is_served": true,
+        "components": [
+            {
+                "component_id": 1,
+                "component_name": "Tomato Sauce",
+                "quantity": 1,
+                "price": 1.5,
+                "availability": true
+            },
+            {
+                "component_id": 2,
+                "component_name": "Mozzarella Cheese",
+                "quantity": 1,
+                "price": 2.0,
+                "availability": true
+            },
+            {
+                "component_id": 6,
+                "component_name": "Basil",
+                "quantity": 1,
+                "price": 0.3,
+                "availability": true
+            }
+        ],
+        "additions": []
+    },
+    {
+        "dish_id": 3,
+        "dish_name": "Caesar Salad",
+        "dish_type": "Salad",
+        "price": 8.75,
+        "description": "Salad with romaine, croutons, and Caesar dressing",
+        "is_served": true,
+        "components": [
+            {
+                "component_id": 3,
+                "component_name": "Romaine Lettuce",
+                "quantity": 1,
+                "price": 0.8,
+                "availability": true
+            },
+            {
+                "component_id": 7,
+                "component_name": "Croutons",
+                "quantity": 1,
+                "price": 0.5,
+                "availability": true
+            }
+        ],
+        "additions": []
+    },
+    {
+        "dish_id": 4,
+        "dish_name": "Beef Burger",
+        "dish_type": "Sandwich",
+        "price": 11.25,
+        "description": "Burger with beef patty, lettuce, and tomato",
+        "is_served": true,
+        "components": [
+            {
+                "component_id": 4,
+                "component_name": "Beef Patty",
+                "quantity": 1,
+                "price": 3.0,
+                "availability": true
+            }
+        ],
+        "additions": [
+            {
+                "addition_id": 1,
+                "addition_name": "Ketchup",
+                "price": 0.2,
+                "availability": true
+            },
+            {
+                "addition_id": 2,
+                "addition_name": "Mayonnaise",
+                "price": 0.25,
+                "availability": true
+            },
+            {
+                "addition_id": 3,
+                "addition_name": "Cheese Slice",
+                "price": 0.5,
+                "availability": true
+            }
+        ]
+    },
+    {
+        "dish_id": 5,
+        "dish_name": "Grilled Salmon",
+        "dish_type": "Seafood",
+        "price": 15.0,
+        "description": "Salmon fillet grilled to perfection",
+        "is_served": true,
+        "components": [
+            {
+                "component_id": 5,
+                "component_name": "Salmon Fillet",
+                "quantity": 1,
+                "price": 5.5,
+                "availability": true
+            }
+        ],
+        "additions": [
+            {
+                "addition_id": 5,
+                "addition_name": "Olive Oil",
+                "price": 0.3,
+                "availability": true
+            }
+        ]
+    }
+]
