@@ -1,6 +1,6 @@
-dish_name;dish_type;price;description
-Spaghetti Carbonara;Pasta;12.99;Classic Italian pasta with creamy sauce
-Margherita Pizza;Pizza;10.50;Traditional pizza with tomato, mozzarella, and basil
-Caesar Salad;Salad;8.75;Salad with romaine, croutons, and Caesar dressing
-Beef Burger;Sandwich;11.25;Burger with beef patty, lettuce, and tomato
-Grilled Salmon;Seafood;15.00;Salmon fillet grilled to perfection
+"dish_id","dish_name","dish_type","price","is_served","description"
+1,"Spaghetti Carbonara","Pasta","12.99",True,"Classic Italian pasta with creamy sauce"
+2,"Margherita Pizza","Pizza","10.50",True,"Traditional pizza with tomato, mozzarella, and basil"
+3,"Caesar Salad","Salad","8.75",True,"Salad with romaine, croutons, and Caesar dressing"
+4,"Beef Burger","Sandwich","11.25",True,"Burger with beef patty, lettuce, and tomato"
+5,"Grilled Salmon","Seafood","15.00",True,"Salmon fillet grilled to perfection"

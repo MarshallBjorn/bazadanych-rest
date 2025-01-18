@@ -508,3 +508,14 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE PROCEDURE tools.cancel_order(
+    p_order_id int
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE orders
+    SET order_status = 4
+    WHERE p_order_id = order_id;
+    RAISE NOTICE 'Order % canceled', p_order_id;
+END;
+$$;

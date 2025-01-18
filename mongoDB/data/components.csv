@@ -1,0 +1,9 @@
+"component_id","component_name","prod_id","price","availability"
+1,"Tomato Sauce",1,"1.50",True
+2,"Mozzarella Cheese",1,"2.00",True
+3,"Romaine Lettuce",2,"0.80",True
+4,"Beef Patty",2,"3.00",True
+5,"Salmon Fillet",3,"5.50",True
+6,"Basil",3,"0.30",True
+7,"Croutons",3,"0.50",True
+8,"Cream Sauce",3,"1.25",True
