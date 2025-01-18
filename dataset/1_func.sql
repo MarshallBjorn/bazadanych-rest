@@ -66,6 +66,28 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION utils.parse_address(p_address_id int)
+RETURNS text AS $$
+DECLARE
+    string text;
+    p_street text;
+    p_loc text;
+    p_code text;
+    p_num text;
+    curs CURSOR FOR SELECT street, locality, post_code, building_num FROM addresses WHERE address_id = p_address_id;
+BEGIN
+    OPEN curs;
+    LOOP
+        FETCH curs INTO p_street, p_loc, p_code, p_num;
+        EXIT WHEN NOT FOUND;
+
+        string := p_street || ' ' || p_num || ', ' || p_code || ' ' || p_loc;
+    END LOOP;
+    CLOSE curs;
+    RETURN TRIM(BOTH '; ' FROM string);
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION display.list_all_dishes()
 RETURNS SETOF RECORD AS
 $$
@@ -73,21 +95,15 @@ DECLARE
     dish_cursor CURSOR FOR SELECT dish_id, dish_name, dish_type, price, is_served, description FROM dishes;
     result_record RECORD;
 BEGIN
-    -- Open the cursor
     OPEN dish_cursor;
-
-    -- Loop through the cursor results
     LOOP
         FETCH dish_cursor INTO result_record;
-        EXIT WHEN NOT FOUND;  -- Exit loop when no more rows are found
+        EXIT WHEN NOT FOUND;
 
-        -- Return each record
         RETURN NEXT result_record;
     END LOOP;
 
-    -- Close the cursor
     CLOSE dish_cursor;
-
     RETURN;
 END;
 $$
@@ -137,23 +153,47 @@ END;
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION display.list_client_orders()
-RETURNS TABLE (ord_id int, pay_meth int, deliv varchar, ordr_stat int, ord_at timestamp, last_update timestamp, client varchar, address_number int, cust_note text) AS
+CREATE OR REPLACE FUNCTION display.list_all_orders()
+RETURNS TABLE (ord_id int, pay_meth varchar, summ numeric, deliv varchar, ordr_stat varchar, ord_at timestamp, last_update timestamp, client varchar, address_string text, cust_note text) AS
 $$
 BEGIN
     RETURN QUERY
-    SELECT order_id, payment_method, deliverer, order_status, ordered_at, last_status_update, client_contact, address, note
-    FROM orders;
+    SELECT 
+        order_id AS ord_id, 
+        payment_methods.method AS pay_meth, 
+        summary AS summ,
+        deliverer AS deliv, 
+        order_statuses.status AS ordr_stat, 
+        ordered_at AS ord_at, 
+        last_status_update AS last_update, 
+        client_contact AS client, 
+        utils.parse_address("address") AS address_string, 
+        note AS cust_note
+    FROM orders
+    INNER JOIN payment_methods
+    ON orders.payment_method = payment_methods.payment_method_id
+    INNER JOIN order_statuses
+    ON orders.order_status = order_statuses.order_status_id;
 END;
 $$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION display.list_staff()
-RETURNS TABLE (staff_id varchar, fname varchar, lname varchar, fposition varchar, fcontact varchar, fgender boolean, fbirthday date, fhire_date date, fstatus text) AS
+RETURNS TABLE (staff_id varchar, fname varchar, lname varchar, fposition varchar, fcontact varchar, faddress text, fgender boolean, fbirthday date, fhire_date date, fstatus text) AS
 $$
 BEGIN
     RETURN QUERY
-    SELECT pesel, firstname, lastname, position, contact, gender, birthday, hire_date, "status"
+    SELECT
+        pesel AS staff_id,
+        firstname AS fname,
+        lastname AS lname,
+        position AS fposition,
+        contact AS fcontact,
+        utils.parse_address("address") AS faddress,
+        gender AS fgender,
+        birthday AS fbirthday,
+        hire_date AS fhire_date,
+        "status" AS fstatus
     FROM staff;
 END;
 $$
@@ -294,7 +334,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION tools.order_sum(p_order_id int)
+CREATE OR REPLACE FUNCTION utils.order_sum(p_order_id int)
 RETURNS numeric AS $$
 DECLARE
     total_addition numeric := 0;
@@ -317,4 +357,4 @@ BEGIN
     RETURN total_price;
 END;
 $$
-LANGUAGE plpgsql
+LANGUAGE plpgsql;

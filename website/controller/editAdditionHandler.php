@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $provider = $_POST['provider'];
     $is_served = $_POST['is_served'];
 
-    $query = "CALL tools.update_dish($1, $2, $3, $4, $5, $6)";
+    $query = "CALL tools.update_addition($1, $2, $3, $4, $5)";
     $params = [$dish_id, $dish_name, $price, $is_served];
 
     $result = pg_query_params($db, $query, $params);

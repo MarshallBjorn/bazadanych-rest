@@ -219,6 +219,7 @@
                         echo "<p class='staff-item-element'><strong>Nazwisko:</strong> {$row['lname']}</p>";
                         echo "<p class='staff-item-element'><strong>Stanowisko:</strong> {$row['fposition']}</p>";
                         echo "<p class='staff-item-element'><strong>Telefon:</strong> {$row['fcontact']}</p>";
+                        echo "<p class='staff-item-element'><strong>Adres:</strong> {$row['faddress']}</p>";
                         echo "<p class='staff-item-element'><strong>Płeć:</strong> {$row['fgender']}</p>";
                         echo "<p class='staff-item-element'><strong>Data urodzenia:</strong> {$row['fbirthday']}</p>";
                         echo "<p class='staff-item-element'><strong>Data zatrudnienia:</strong> {$row['fhire_date']}</p>";
@@ -257,7 +258,7 @@
                 <div id="order-list">
                     <h2>Zamówienia</h2>
                 <?php
-                    $query = "SELECT * FROM display.list_client_orders()";
+                    $query = "SELECT * FROM display.list_all_orders()";
                     $result = pg_query($db, $query);
 
                     if (!$result) {
@@ -269,12 +270,15 @@
                         echo "<div class='order-item'>";
                         echo "<p class='order-element'><strong>ID zamówienia:</strong> {$row['ord_id']}</p>";
                         echo "<p class='order-element'><strong>Metoda płatności:</strong> {$row['pay_meth']}</p>";
-                        echo "<p class='order-element'><strong>Dostawca:</strong> {$row['deliv']}</p>";
+                        echo "<p class='order-element'><strong>Suma:</strong> {$row['summ']}</p>";
+                        if($row['deliv'] != "") {
+                            echo "<p class='order-element'><strong>Dostawca:</strong> {$row['deliv']}</p>";
+                        }
                         echo "<p class='order-element'><strong>Status zamówienia:</strong> {$row['ordr_stat']}</p>";
                         echo "<p class='order-element'><strong>Data zamówienia:</strong> {$row['ord_at']}</p>";
                         echo "<p class='order-element'><strong>Ostatnia aktualizacja:</strong> {$row['last_update']}</p>";
                         echo "<p class='order-element'><strong>Klient:</strong> {$row['client']}</p>";
-                        echo "<p class='order-element'><strong>Numer adresu:</strong> {$row['address_number']}</p>";
+                        echo "<p class='order-element'><strong>Numer adresu:</strong> {$row['address_string']}</p>";
                         echo "<p class='order-element'><strong>Notatka klienta:</strong> {$row['cust_note']}</p>";
                         echo "<button type='button' onclick='editOrder({$row['ord_id']})'>Zmień status</button>";
                         echo "<button type='button' class='cancel_button' onclick='cancelOrder({$row['ord_id']})'>Anuluj zamówienie</button>";
