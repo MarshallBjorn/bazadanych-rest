@@ -6,6 +6,8 @@ if (!isset($_SESSION['logged'])) {
     exit;
 }
 
+$_SESSION['current_view'] = 'employee-list';
+
 include '../database/config.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {

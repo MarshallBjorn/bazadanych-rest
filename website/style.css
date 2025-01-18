@@ -348,6 +348,11 @@ body {
     background-color: #0056b3;
 }
 
+.cancel_button {
+    background-color: #d81010 !important;
+    margin-left: 10px;
+}
+
 /* Employee List */
 #employee-list {
     display: none;
@@ -364,19 +369,15 @@ body {
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
 }
 
 .staff-item-element {
-    margin: 0;
+    margin: 5px;
     font-size: 14px;
     color: #333;
 }
 
 .staff-item button {
-    align-self: flex-start;
     padding: 8px 16px;
     font-size: 14px;
     background-color: #007BFF;

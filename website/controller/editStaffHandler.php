@@ -6,26 +6,22 @@ if (!isset($_SESSION['logged'])) {
     exit;
 }
 
+$_SESSION['current_view'] = 'employee-list';
+
 include '../database/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $pesel = $_POST['pesel'];
-    $firstname = $_POST['firstname'];
-    $lastname = $_POST['lastname'];
-    $position = $_POST['position'];
-    $address = json_encode(value: [
-        $_POST['street'],
-        $_POST['locality'],
-        $_POST['post_code'],
-        $_POST['building_num']
-    ]);
-    $contact = $_POST['contact'];
-    $gender = $_POST['gender'];
-    $birthday = $_POST['birthday'];
+    $pesel = $_POST['staff_id'];
+    $firstname = $_POST['fname'];
+    $lastname = $_POST['lname'];
+    $position = $_POST['fposition'];
+    $contact = $_POST['fcontact'];
+    $gender = $_POST['fgender'];
+    $birthday = $_POST['fbirthday'];
 
-    $query = "CALL tools.update_staff($1,$2,$3,$4,$5::jsonb,$6,$7,$8)";
+    $query = "CALL tools.update_staff($1,$2,$3,$4,$5,$6,$7)";
     $result = pg_query_params($db, $query, [
-        $pesel, $firstname, $lastname, $position, $address, $contact, $gender, $birthday
+        $pesel, $firstname, $lastname, $position, $contact, $gender, $birthday
     ]);
 
     if ($result) {
