@@ -66,17 +66,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION tools.is_servable(p_dish_name varchar)
-RETURNS boolean AS
-$$
-DECLARE
-    dish_status boolean;
-BEGIN
-    SELECT is_served INTO dish_status FROM dishes WHERE dish_name = p_dish_name;
-    RETURN dish_status;
-END;
-$$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION display.list_all_dishes()
 RETURNS SETOF RECORD AS
 $$

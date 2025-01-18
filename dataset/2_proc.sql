@@ -72,231 +72,6 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE tools.remove_dish_hard (
-    p_dish_name varchar,
-    p_dish_type varchar
-)
-LANGUAGE plpgsql
-AS
-$$
-DECLARE
-    do_exists boolean;
-    dish_number int;
-BEGIN
-    SELECT EXISTS(SELECT 1 FROM dishes WHERE dish_name = p_dish_name AND dish_type = p_dish_type) INTO do_exists;
-
-    IF NOT do_exists THEN
-        RAISE EXCEPTION 'Dish "%" of the "%" type, does not exist.', p_dish_name, p_dish_type;
-        RETURN;
-    END IF;
-
-    SELECT dish_id INTO dish_number
-    FROM dishes
-    WHERE dish_name = p_dish_name AND dish_type = p_dish_type;
-
-    DELETE FROM dishes_components WHERE dish_number = dish_id;
-    DELETE FROM dishes_additions WHERE dish_number = dish_id;
-    DELETE FROM dishes WHERE dish_id = dish_number;
-
-    RAISE NOTICE 'Dish "%" if the "%" type deleted successfuly.', p_dish_name, p_dish_type;
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE tools.item_soft_toggle (
-    p_name varchar,
-    p_type varchar
-)
-LANGUAGE plpgsql
-AS
-$$
-DECLARE
-    item_number int;
-    current_status boolean;
-BEGIN
-    CASE
-        WHEN p_type = 'DISH' THEN
-            item_number := utils.find_item(p_name, p_type);
-            UPDATE dishes SET is_served = NOT is_served WHERE dish_id = item_number;
-        WHEN p_type = 'COMPONENT' THEN
-            item_number := utils.find_item(p_name, p_type);
-            UPDATE components SET availability = NOT availability WHERE component_id = item_number;
-        WHEN p_type = 'ADDITION' THEN
-            item_number := utils.find_item(p_name, p_type);
-            UPDATE additions SET availability = NOT availability WHERE addition_id = item_number;
-        WHEN p_type = 'PROVIDER' THEN
-            item_number := utils.find_item(p_name, p_type);
-            UPDATE providers SET is_partner = NOT is_partner WHERE provider_id = item_number;
-        ELSE
-            RAISE EXCEPTION 'Unknown type: %', p_type;
-    END CASE;
-    RAISE NOTICE 'Item % of the % type has been successfuly toggled.', p_name, p_type;
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE tools.update_item_price (
-    p_name varchar,
-    p_type varchar,
-    p_price numeric
-)
-LANGUAGE plpgsql
-AS
-$$
-DECLARE
-    item_number int;
-BEGIN
-    item_number := utils.find_item(p_name, p_type);
-    CASE
-        WHEN p_type = 'DISH' THEN
-            UPDATE dishes SET price = p_price WHERE dish_id = item_number;
-        WHEN p_type = 'COMPONENT' THEN
-            UPDATE components SET price = p_price WHERE component_id = item_number;
-        WHEN p_type = 'ADDITION' THEN
-            UPDATE additions SET price = p_price WHERE addition_id = item_number;
-        ELSE
-            RAISE EXCEPTION 'Unknown type: %', p_type;
-    END CASE;        
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE tools.update_item_name (
-    p_name varchar,
-    p_type varchar,
-    p_new_name varchar
-)
-LANGUAGE plpgsql
-AS
-$$
-DECLARE
-    item_number int;
-BEGIN
-    item_number := utils.find_item(p_name, p_type);
-    CASE
-        WHEN p_type = 'DISH' THEN
-            UPDATE dishes SET dish_name = p_new_name WHERE dish_id = item_number;
-        WHEN p_type = 'COMPONENT' THEN
-            UPDATE components SET component_name = p_new_name WHERE component_id = item_number;
-        WHEN p_type = 'ADDITION' THEN
-            UPDATE additions SET addition_name = p_new_name WHERE addition_id = item_number;
-        WHEN p_type = 'PROVIDER' THEN
-            UPDATE providers SET prod_name = p_new_name WHERE prod_id = item_number;
-        ELSE
-            RAISE EXCEPTION 'Unknown item type: %', p_type;
-    END CASE;
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE tools.update_dish(
-    p_dish_id INT,
-    p_new_name varchar,
-    p_type varchar,
-    p_price numeric,
-    p_description text,
-    p_is_served boolean
-) LANGUAGE plpgsql
-AS $$
-BEGIN
-    UPDATE dishes 
-    SET 
-    dish_name = p_new_name,
-    dish_type = p_type,
-    price = p_price,
-    "description" = p_description,
-    is_served = p_is_served
-    WHERE dish_id = p_dish_id;
-    
-    RAISE NOTICE 'Item has been updated.';
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE tools.update_staff(
-    p_pesel varchar,
-    p_new_firstname varchar,
-    p_new_lastname varchar,
-    p_position varchar,
-    p_contact varchar,
-    p_gender boolean,
-    p_birthday date
-) LANGUAGE plpgsql AS $$
-DECLARE
-    staff_id varchar;
-BEGIN
-    staff_id := utils.find_item_alt(p_pesel);
-
-    UPDATE staff SET
-    firstname = p_new_firstname,
-    lastname = p_new_lastname,
-    position = p_position,
-    contact = p_contact,
-    gender = p_gender,
-    birthday = p_birthday
-    WHERE pesel = staff_id;
-    RAISE NOTICE 'Person info has been updated.';
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE tools.update_addition(
-    p_addition_id int,
-    p_name varchar,
-    p_price numeric
-) LANGUAGE plpgsql AS $$
-BEGIN
-    UPDATE additoins SET
-    p_addition_name = addition_name,
-    p_price = price
-    WHERE addition_id = p_addition_id;
-    RAISE NOTICE 'Addition has been updated.';
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE tools.update_staff_name (
-    p_pesel varchar,
-    p_firstname varchar,
-    p_lastname varchar
-)
-LANGUAGE plpgsql
-AS
-$$
-DECLARE
-    staff_pesel varchar;
-BEGIN
-    SELECT pesel INTO staff_pesel FROM staff WHERE pesel = p_pesel;
-
-    IF staff_pesel IS NULL THEN
-        RAISE EXCEPTION 'Staff member "%" has not been found', p_pesel;
-    END IF;
-
-    UPDATE staff SET firstname = p_firstname WHERE pesel = p_pesel;
-    UPDATE staff SET lastname = p_lastname WHERE pesel = p_pesel;
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE tools.update_item_address (
-    p_item varchar,
-    p_type varchar,
-    p_address jsonb DEFAULT '[]'::jsonb
-)
-LANGUAGE plpgsql
-AS
-$$
-DECLARE
-    item_number int;
-    staff_number varchar;
-    address_number int;
-BEGIN
-    address_number := tools.new_address(p_address);
-
-    IF p_type = 'PROVIDER' THEN
-        item_number := utils.find_item(p_item, p_type);
-        UPDATE providers SET address = address_number WHERE prod_id = item_number;
-    ELSIF p_type = 'STAFF' THEN
-        staff_number := utils.find_item_alt(p_item);
-        UPDATE staff SET address = address_number WHERE pesel = staff_number;
-    ELSE
-        RETURN;
-    END IF;
-END;
-$$;
-
 CREATE OR REPLACE PROCEDURE tools.create_new_order (
     p_payment_method_name varchar,
     p_client_contact varchar,
@@ -505,6 +280,163 @@ BEGIN
     VALUES (p_pesel, p_firstname, p_lastname, p_position, address_id, p_contact, p_gender, p_birthday);
 
     RAISE NOTICE 'Staff member "%" added successfully.', p_firstname || ' ' || p_lastname;
+END;
+$$;
+
+/*
+CREATE OR REPLACE PROCEDURE tools.remove_dish_hard (
+    p_dish_name varchar,
+    p_dish_type varchar
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    do_exists boolean;
+    dish_number int;
+BEGIN
+    SELECT EXISTS(SELECT 1 FROM dishes WHERE dish_name = p_dish_name AND dish_type = p_dish_type) INTO do_exists;
+
+    IF NOT do_exists THEN
+        RAISE EXCEPTION 'Dish "%" of the "%" type, does not exist.', p_dish_name, p_dish_type;
+        RETURN;
+    END IF;
+
+    SELECT dish_id INTO dish_number
+    FROM dishes
+    WHERE dish_name = p_dish_name AND dish_type = p_dish_type;
+
+    DELETE FROM dishes_components WHERE dish_number = dish_id;
+    DELETE FROM dishes_additions WHERE dish_number = dish_id;
+    DELETE FROM dishes WHERE dish_id = dish_number;
+
+    RAISE NOTICE 'Dish "%" if the "%" type deleted successfuly.', p_dish_name, p_dish_type;
+END;
+$$;
+*/
+
+CREATE OR REPLACE PROCEDURE tools.item_soft_toggle (
+    p_name varchar,
+    p_type varchar
+)
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    item_number int;
+    current_status boolean;
+BEGIN
+    CASE
+        WHEN p_type = 'DISH' THEN
+            item_number := utils.find_item(p_name, p_type);
+            UPDATE dishes SET is_served = NOT is_served WHERE dish_id = item_number;
+        WHEN p_type = 'COMPONENT' THEN
+            item_number := utils.find_item(p_name, p_type);
+            UPDATE components SET availability = NOT availability WHERE component_id = item_number;
+        WHEN p_type = 'ADDITION' THEN
+            item_number := utils.find_item(p_name, p_type);
+            UPDATE additions SET availability = NOT availability WHERE addition_id = item_number;
+        WHEN p_type = 'PROVIDER' THEN
+            item_number := utils.find_item(p_name, p_type);
+            UPDATE providers SET is_partner = NOT is_partner WHERE provider_id = item_number;
+        ELSE
+            RAISE EXCEPTION 'Unknown type: %', p_type;
+    END CASE;
+    RAISE NOTICE 'Item % of the % type has been successfuly toggled.', p_name, p_type;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE tools.update_dish(
+    p_dish_id INT,
+    p_new_name varchar,
+    p_type varchar,
+    p_price numeric,
+    p_description text,
+    p_is_served boolean
+) LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE dishes SET 
+    dish_name = p_new_name,
+    dish_type = p_type,
+    price = p_price,
+    "description" = p_description,
+    is_served = p_is_served
+    WHERE dish_id = p_dish_id;
+    
+    RAISE NOTICE 'Item has been updated.';
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE tools.update_staff(
+    p_pesel varchar,
+    p_new_firstname varchar,
+    p_new_lastname varchar,
+    p_position varchar,
+    p_contact varchar,
+    p_gender boolean,
+    p_birthday date
+) LANGUAGE plpgsql AS $$
+DECLARE
+    staff_id varchar;
+BEGIN
+    staff_id := utils.find_item_alt(p_pesel);
+
+    UPDATE staff SET
+    firstname = p_new_firstname,
+    lastname = p_new_lastname,
+    position = p_position,
+    contact = p_contact,
+    gender = p_gender,
+    birthday = p_birthday
+    WHERE pesel = staff_id;
+    RAISE NOTICE 'Person info has been updated.';
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE tools.update_addition(
+    p_addition_id int,
+    p_name varchar,
+    p_price numeric,
+    p_provider_name varchar,
+    p_status boolean
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+    p_provider_id int;
+BEGIN
+    p_provider_id := utils.find_item(p_provider_name, 'PROVIDER');
+
+    UPDATE additions SET
+    addition_name = p_name,
+    price = p_price,
+    "provider" = p_provider_id,
+    "availability" = p_status
+    WHERE addition_id = p_addition_id;
+    RAISE NOTICE 'Addition has been updated.';
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE tools.update_component(
+    p_component_id int,
+    p_name varchar,
+    p_price numeric,
+    p_provider_name varchar,
+    p_status boolean
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+    p_provider_id int;
+BEGIN
+    p_provider_id := utils.find_item(p_provider_name, 'PROVIDER');
+
+    UPDATE components SET
+    component_name = p_name,
+    price = p_price,
+    prod_id = p_provider_id,
+    "availability" = p_status
+    WHERE component_id = p_component_id;
+    RAISE NOTICE 'Component has been updated.';
 END;
 $$;
 
