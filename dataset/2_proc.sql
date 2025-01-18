@@ -440,6 +440,29 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE PROCEDURE tools.update_provider(
+    p_provider_id int,
+    p_name varchar,
+    p_contact varchar,
+    p_address jsonb,
+    p_status boolean
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+    p_address_id int;
+BEGIN 
+    p_address_id := tools.new_address(p_address);
+
+    UPDATE providers SET
+    prod_name = p_name,
+    contact = p_contact,
+    "address" = p_address_id,
+    is_partner = p_status
+    WHERE p_provider_id = prod_id;
+    RAISE NOTICE 'Provider has been updated.';
+END;
+$$;
+
 CREATE OR REPLACE PROCEDURE tools.cancel_order(
     p_order_id int
 )
@@ -449,5 +472,14 @@ BEGIN
     SET order_status = 4
     WHERE p_order_id = order_id;
     RAISE NOTICE 'Order % canceled', p_order_id;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE tools.set_employee_status(p_pesel varchar, p_status varchar)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE staff SET
+    "status" = p_status
+    WHERE p_pesel = pesel;
 END;
 $$;

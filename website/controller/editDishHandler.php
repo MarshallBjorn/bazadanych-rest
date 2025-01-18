@@ -6,6 +6,8 @@ if (!isset($_SESSION['logged'])) {
     exit;
 }
 
+$_SESSION['current_view'] = 'item-list';
+
 include '../database/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -23,10 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($result) {
         $_SESSION['message'] = "Danie zostało pomyślnie zaktualizowane.";
-        header("Location: ../home.php?success");
+        header("Location: ../home.php");
     } else {
         $_SESSION['message'] = "Błąd podczas aktualizacji: " . pg_last_error($db);
-        header("Location: ../home.php?error");
+        header("Location: ../home.php");
     }
 }
 ?>

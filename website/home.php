@@ -45,19 +45,20 @@
                 <form action="./controller/newOrderHandler.php" method="POST">
                     <label for="payment_method_name">Metoda płatności*</label>
                     <input type="text" id="payment_method_name" name="payment_method_name" required />
-
-                    <label for="client_contact">Kontakt klienta*</label>
+                    <label for="client_contact">Telefon*</label>
                     <input type="text" id="client_contact" name="client_contact" required />
-
                     <label for="note">Notatka</label>
                     <textarea id="note" name="note"></textarea>
-
-                    <label for="address">Adres (JSON)*</label>
-                    <input type="text" id="address" name="address" required />
-
+                    <label>Ulica*</label>
+                    <input type="text" name="street" required>
+                    <label>Miasto*</label>
+                    <input type="text" name="locality" required>
+                    <label>Kod pocztowy*</label>
+                    <input type="text" name="post_code" required>
+                    <label>Numer budynku:*</label>
+                    <input type="text" name="building_num" required>
                     <label for="dishes">Dania (JSON)*</label>
                     <textarea id="dishes" name="dishes" required></textarea>
-
                     <label for="additions">Dodatki (JSON)</label>
                     <textarea id="additions" name="additions"></textarea>
 
@@ -71,7 +72,7 @@
                     include './database/config.php';
 
                     $query = "SELECT * FROM display.list_all_dishes() AS t(dish_id INT, dish_name VARCHAR, dish_type VARCHAR, price NUMERIC, is_served boolean, description TEXT)";
-                    $query2 = "SELECT * FROM display.list_all_additions() AS t(addition_name VARCHAR, price NUMERIC, availability boolean)";
+                    $query2 = "SELECT * FROM display.list_all_additions() AS t(addition_id INT, addition_name VARCHAR, price NUMERIC, availability boolean)";
                     $result = pg_query($db, $query);
                     $result2 = pg_query($db, $query2);
 
@@ -92,27 +93,20 @@
 
                         echo "<div class='edit-section'>";
                         echo "<form method='POST' action='./controller/editDishHandler.php'>";
-
                         echo "<input type='hidden' id='edit-name' name='dish_id' value='{$row['dish_id']}'/>";
-
                         echo "<label for='edit-name'>Nazwa:</label>";
                         echo "<input type='text' id='edit-name' name='dish_name' value='{$row['dish_name']}' required />";
-
                         echo "<label for='edit-type'>Typ:</label>";
                         echo "<input type='text' id='edit-type' name='dish_type' value='{$row['dish_type']}' required />";
-
                         echo "<label for='edit-price'>Cena:</label>";
                         echo "<input type='number' id='edit-price' name='price' value='{$row['price']}' step='0.01' required />";
-
                         echo "<label for='edit-description'>Opis:</label>";
                         echo "<textarea id='edit-description' name='description' required>{$row['description']}</textarea>";
-
                         echo "<label for='edit-served'>Dostępne:</label>";
                         echo "<select id='edit-served' name='is_served'>";
                         echo "<option value='t'" . ($row['is_served'] == 't' ? ' selected' : '') . ">Tak</option>";
                         echo "<option value='f'" . ($row['is_served'] == 'f' ? ' selected' : '') . ">Nie</option>";
                         echo "</select>";
-
                         echo "<button type='submit'>Zapisz</button>";
                         echo "</form>";
                         echo "</div>";
@@ -123,25 +117,27 @@
 
                     while ($row = pg_fetch_assoc($result2)) {
                         echo "<div class='item'>";
-                        echo "<p class=item-element><strong>Nazwa:</strong> $row[addition_name]</p>".  
+                        echo "<p class='item-element'><strong>ID:</strong> {$row['addition_id']}</p>";
+                        echo "<p class=item-element><strong>Nazwa:</strong> $row[addition_name]</p>".
+                            "<p class=item-element><strong>Dostawca:</strong></p>". 
                             "<p class=item-element><strong>Cena:</strong> $row[price]</p>".
                             "<p class=item-element><strong>Dostępne:</strong> ". ($row['availability'] == 't' ? 'Tak' : 'Nie') ."</p>";
                         echo "<button type=button onclick='toggleEditSection(this)'> Edytuj </button>";
 
                         echo "<div class='edit-section'>";
-                        echo "<form onsubmit='event.preventDefault(); saveDish(this.querySelector(\"button[type=\\'submit\\']\"));'>";
+                        echo "<form method='POST' action='./controller/editAdditionHandler.php'>";
+                        echo "<input type='hidden' id='edit-name' name='addition_id' value='{$row['addition_id']}'/>";
                         echo "<label for='edit-name'>Nazwa:</label>";
-                        echo "<input type='text' id='edit-name' name='dish_name' value='{$row['addition_name']}' required />";
-
-                        echo "<label for='edit-type'>price:</label>";
-                        echo "<input type='text' id='edit-type' name='dish_type' value='{$row['price']}' required />";
-
+                        echo "<input type='text' id='edit-name' name='addition_name' value='{$row['addition_name']}' required />";
+                        echo "<label for='edit-type'>Provider:</label>";
+                        echo "<input type='text' id='edit-type' name='provider' required />";
+                        echo "<label for='edit-type'>Cena:</label>";
+                        echo "<input type='text' id='edit-type' name='dish_price' value='{$row['price']}' required />";
                         echo "<label for='edit-served'>Dostępne:</label>";
                         echo "<select id='edit-served' name='is_served'>";
                         echo "<option value='t'" . ($row['availability'] == 't' ? ' selected' : '') . ">Tak</option>";
                         echo "<option value='f'" . ($row['availability'] == 'f' ? ' selected' : '') . ">Nie</option>";
                         echo "</select>";
-
                         echo "<button type='submit'>Zapisz</button>";
                         echo "</form>";
                         echo "</div>";
@@ -222,12 +218,38 @@
                         echo "<p class='staff-item-element'><strong>Imię:</strong> {$row['fname']}</p>";
                         echo "<p class='staff-item-element'><strong>Nazwisko:</strong> {$row['lname']}</p>";
                         echo "<p class='staff-item-element'><strong>Stanowisko:</strong> {$row['fposition']}</p>";
-                        echo "<p class='staff-item-element'><strong>Kontakt:</strong> {$row['fcontact']}</p>";
+                        echo "<p class='staff-item-element'><strong>Telefon:</strong> {$row['fcontact']}</p>";
+                        echo "<p class='staff-item-element'><strong>Adres:</strong> {$row['faddress']}</p>";
                         echo "<p class='staff-item-element'><strong>Płeć:</strong> {$row['fgender']}</p>";
                         echo "<p class='staff-item-element'><strong>Data urodzenia:</strong> {$row['fbirthday']}</p>";
                         echo "<p class='staff-item-element'><strong>Data zatrudnienia:</strong> {$row['fhire_date']}</p>";
                         echo "<p class='staff-item-element'><strong>Status:</strong> {$row['fstatus']}</p>";
-                        echo "<button type='button'>Edytuj</button>";
+                        echo "<button type='button' onclick='toggleEditSection(this)'>Edytuj</button>";
+                        echo "<button type='button' class='cancel_button'>Zwolnij</button>";
+                    
+                        echo "<div class='edit-section'>";
+                        echo "<form method='POST' action='./controller/editStaffHandler.php'>";
+                        echo "<input type='hidden' name='staff_id' value='{$row['staff_id']}' />";
+                        echo "<label for='edit-fname'>Imię:</label>";
+                        echo "<input type='text' id='edit-fname' name='fname' value='{$row['fname']}' required />";
+                        echo "<label for='edit-lname'>Nazwisko:</label>";
+                        echo "<input type='text' id='edit-lname' name='lname' value='{$row['lname']}' required />";
+                        echo "<label for='edit-position'>Stanowisko:</label>";
+                        echo "<input type='text' id='edit-position' name='fposition' value='{$row['fposition']}' required />";
+                        echo "<label for='edit-contact'>Telefon:</label>";
+                        echo "<input type='text' id='edit-contact' name='fcontact' value='{$row['fcontact']}' required />";
+                        echo "<label for='edit-gender'>Płeć:</label>";
+                        echo "<select id='edit-gender' name='fgender'>";
+                        echo "<option value='t'" . ($row['fgender'] == 'M' ? ' selected' : '') . ">Mężczyzna</option>";
+                        echo "<option value='f'" . ($row['fgender'] == 'F' ? ' selected' : '') . ">Kobieta</option>";
+                        echo "</select>";
+                        echo "<label for='edit-birthday'>Data urodzenia:</label>";
+                        echo "<input type='date' id='edit-birthday' name='fbirthday' value='{$row['fbirthday']}' required />";
+                        echo "<label for='edit-hire-date'>Data zatrudnienia:</label>";
+                        echo "<input type='date' id='edit-hire-date' name='fhire_date' value='{$row['fhire_date']}' disabled />";
+                        echo "<button type='submit'>Zapisz</button>";
+                        echo "</form>";
+                        echo "</div>";
                         echo "</div>";
                     }
                     ?>
@@ -236,7 +258,7 @@
                 <div id="order-list">
                     <h2>Zamówienia</h2>
                 <?php
-                    $query = "SELECT * FROM display.list_client_orders()";
+                    $query = "SELECT * FROM display.list_all_orders()";
                     $result = pg_query($db, $query);
 
                     if (!$result) {
@@ -245,16 +267,22 @@
                     }
 
                     while ($row = pg_fetch_assoc($result)) {
+                        echo "<div class='order-item'>";
                         echo "<p class='order-element'><strong>ID zamówienia:</strong> {$row['ord_id']}</p>";
                         echo "<p class='order-element'><strong>Metoda płatności:</strong> {$row['pay_meth']}</p>";
-                        echo "<p class='order-element'><strong>Dostawca:</strong> {$row['deliv']}</p>";
+                        echo "<p class='order-element'><strong>Suma:</strong> {$row['summ']}</p>";
+                        if($row['deliv'] != "") {
+                            echo "<p class='order-element'><strong>Dostawca:</strong> {$row['deliv']}</p>";
+                        }
                         echo "<p class='order-element'><strong>Status zamówienia:</strong> {$row['ordr_stat']}</p>";
                         echo "<p class='order-element'><strong>Data zamówienia:</strong> {$row['ord_at']}</p>";
                         echo "<p class='order-element'><strong>Ostatnia aktualizacja:</strong> {$row['last_update']}</p>";
                         echo "<p class='order-element'><strong>Klient:</strong> {$row['client']}</p>";
-                        echo "<p class='order-element'><strong>Numer adresu:</strong> {$row['address_number']}</p>";
+                        echo "<p class='order-element'><strong>Numer adresu:</strong> {$row['address_string']}</p>";
                         echo "<p class='order-element'><strong>Notatka klienta:</strong> {$row['cust_note']}</p>";
-                        echo "<button type='button' onclick='editOrder({$row['ord_id']})'>Edytuj</button>";
+                        echo "<button type='button' onclick='editOrder({$row['ord_id']})'>Zmień status</button>";
+                        echo "<button type='button' class='cancel_button' onclick='cancelOrder({$row['ord_id']})'>Anuluj zamówienie</button>";
+                        echo "</div>";
                     }
                     ?>
                 </div>

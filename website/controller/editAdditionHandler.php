@@ -6,18 +6,19 @@ if (!isset($_SESSION['logged'])) {
     exit;
 }
 
+$_SESSION['current_view'] = 'item-list';
+
 include '../database/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $dish_id = $_POST['dish_id'];
-    $dish_name = $_POST['dish_name'];
-    $dish_type = $_POST['dish_type'];
+    $addition_id = $_POST['addition_id'];
+    $addition_name = $_POST['addition_name'];
     $price = $_POST['price'];
-    $description = $_POST['description'];
+    $provider = $_POST['provider'];
     $is_served = $_POST['is_served'];
 
-    $query = "CALL tools.update_dish($1, $2, $3, $4, $5, $6)";
-    $params = [$dish_id, $dish_name, $dish_type, $price, $description, $is_served];
+    $query = "CALL tools.update_addition($1, $2, $3, $4, $5)";
+    $params = [$dish_id, $dish_name, $price, $is_served];
 
     $result = pg_query_params($db, $query, $params);
 

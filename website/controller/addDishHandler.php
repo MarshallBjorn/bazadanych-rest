@@ -6,6 +6,8 @@ if (!isset($_SESSION['logged'])) {
     exit;
 }
 
+$_SESSION['current_view'] = 'dish-add';
+
 include '../database/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -27,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
     
     if ($result) {
-        header("Location: home.php?alert=success");
+        header("Location: ../home.php");
     } else {
         echo "Wystąpił błąd podczas dodawania dania: " . pg_last_error($db);
     }
