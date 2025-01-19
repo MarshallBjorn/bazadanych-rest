@@ -28,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $dishes_text = $_POST['dishes'] ?? '[]';
     $additions_text = $_POST['additions'] ?? '[]';
-    echo $dishes_text;
 
     $query = "CALL tools.create_new_order($1, $2, $3, $4, $5, $6)";
     $result = pg_query_params($db, $query, [
@@ -41,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
 
     if ($result) {
-        // header("Location: ../home.php");
+        header("Location: ../home.php");
     } else {
         echo "Wystąpił błąd podczas tworzenia zamówienia: " . pg_last_error($db);
     }
