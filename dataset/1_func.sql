@@ -113,7 +113,11 @@ CREATE OR REPLACE FUNCTION display.list_all_additions()
 RETURNS SETOF RECORD AS
 $$
 DECLARE
-    addition_cursor CURSOR FOR SELECT addition_id, addition_name, price, availability FROM additions;
+    addition_cursor CURSOR FOR 
+        SELECT addition_id, addition_name, price, providers.prod_name, "availability" 
+        FROM additions
+        INNER JOIN providers ON
+        providers.prod_id=additions.provider;
     result_record RECORD;
 BEGIN
     OPEN addition_cursor;
@@ -135,7 +139,11 @@ CREATE OR REPLACE FUNCTION display.list_all_components()
 RETURNS SETOF RECORD AS
 $$
 DECLARE
-    component_cursor CURSOR FOR SELECT component_name, provider, price FROM components WHERE availability = TRUE;
+    component_cursor CURSOR FOR 
+        SELECT component_id, component_name, price, prod_name, "availability"
+        FROM components
+        INNER JOIN providers ON
+        providers.prod_id=components.prod_id;
     result_record RECORD;
 BEGIN
     OPEN component_cursor;

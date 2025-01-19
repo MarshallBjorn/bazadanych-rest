@@ -72,9 +72,11 @@
                     include './database/config.php';
 
                     $query = "SELECT * FROM display.list_all_dishes() AS t(dish_id INT, dish_name VARCHAR, dish_type VARCHAR, price NUMERIC, is_served boolean, description TEXT)";
-                    $query2 = "SELECT * FROM display.list_all_additions() AS t(addition_id INT, addition_name VARCHAR, price NUMERIC, availability boolean)";
+                    $query2 = "SELECT * FROM display.list_all_additions() AS t(addition_id INT, addition_name VARCHAR, price NUMERIC, prod_name VARCHAR, availability boolean)";
+                    $query3 = "SELECT * FROM display.list_all_components() AS t(component_id INT, component_name VARCHAR, price NUMERIC, prod_name VARCHAR, availability boolean)";
                     $result = pg_query($db, $query);
                     $result2 = pg_query($db, $query2);
+                    $result3 = pg_query($db, $query3);
 
                     if(!$result || !$result2) {
                         echo "Wystąpił błąd podczas przetwarzania żądania" . pg_last_error($db);
@@ -119,7 +121,7 @@
                         echo "<div class='item'>";
                         echo "<p class='item-element'><strong>ID:</strong> {$row['addition_id']}</p>";
                         echo "<p class=item-element><strong>Nazwa:</strong> $row[addition_name]</p>".
-                            "<p class=item-element><strong>Dostawca:</strong></p>". 
+                            "<p class=item-element><strong>Dostawca:</strong> $row[prod_name]</p>". 
                             "<p class=item-element><strong>Cena:</strong> $row[price]</p>".
                             "<p class=item-element><strong>Dostępne:</strong> ". ($row['availability'] == 't' ? 'Tak' : 'Nie') ."</p>";
                         echo "<button type=button onclick='toggleEditSection(this)'> Edytuj </button>";
@@ -130,9 +132,9 @@
                         echo "<label for='edit-name'>Nazwa:</label>";
                         echo "<input type='text' id='edit-name' name='addition_name' value='{$row['addition_name']}' required />";
                         echo "<label for='edit-type'>Provider:</label>";
-                        echo "<input type='text' id='edit-type' name='provider' required />";
+                        echo "<input type='text' id='edit-type' name='add_provider' value='{$row['prod_name']}' required />";
                         echo "<label for='edit-type'>Cena:</label>";
-                        echo "<input type='text' id='edit-type' name='dish_price' value='{$row['price']}' required />";
+                        echo "<input type='text' id='edit-type' name='add_price' value='{$row['price']}' required />";
                         echo "<label for='edit-served'>Dostępne:</label>";
                         echo "<select id='edit-served' name='is_served'>";
                         echo "<option value='t'" . ($row['availability'] == 't' ? ' selected' : '') . ">Tak</option>";
@@ -141,6 +143,18 @@
                         echo "<button type='submit'>Zapisz</button>";
                         echo "</form>";
                         echo "</div>";
+                        echo "</div>";
+                    }
+
+                    echo "<h2>Składniki</h2>";
+                    while($row = pg_fetch_assoc($result3)) {
+                        echo "<div class='item'>";
+                        echo "<p class='item-element'><strong>ID:</strong> {$row['component_id']}</p>";
+                        echo "<p class='item-element'><strong>Nazwa:</strong> $row[component_name]</p>" .
+                            "<p class='item-element'><strong>Cena:</strong> $row[price]</p>" .
+                            "<p class='item-element'><strong>Dostawca:</strong> $row[prod_name]</p>" .
+                            "<p class='item-element'><strong>Dostępne:</strong> ". ($row['availability'] == 't' ? 'Tak' : 'Nie') ."</p>";
+                        echo "<button type=button onclick='toggleEditSection(this)'> Edytuj </button>";
                         echo "</div>";
                     }
 
