@@ -10,7 +10,7 @@ BEGIN
         WHEN item_type = 'ADDITION' THEN
             SELECT EXISTS(SELECT 1 FROM additions WHERE p_name = addition_name) INTO do_exists;
         WHEN item_type = 'COMPONENT' THEN
-            SELECT EXISTS(SELECT 1 FROM components WHERE p_name = addition_name) INTO do_exists;
+            SELECT EXISTS(SELECT 1 FROM components WHERE p_name = component_name) INTO do_exists;
         WHEN item_type = 'PROVIDER' THEN
             SELECT EXISTS(SELECT 1 FROM providers WHERE p_name = prod_name) INTO do_exists;
         ELSE

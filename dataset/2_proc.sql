@@ -13,7 +13,7 @@ DECLARE
     new_dish_id int;
     component jsonb;
     addition jsonb;
-	current_item int;
+	current_item varchar;
     quantity int;
 	do_exists boolean;
 BEGIN
@@ -36,25 +36,20 @@ BEGIN
         -- Loop through each component and insert it into the dishes_components table
         FOR component IN SELECT * FROM jsonb_array_elements(p_components) LOOP
             -- Extract the component_id and quantity from each JSON element
-            current_item := (component->>'id')::int;
+            current_item := component->>'name';
             quantity := (component->>'quantity')::int;
 
-			SELECT EXISTS (SELECT 1 FROM components WHERE components.component_id = current_item) INTO do_exists;
-
-			IF do_exists THEN
-            	-- Insert the component into dishes_components table
-            	INSERT INTO dishes_components (dish_id, component_id, quantity)
-            	VALUES (new_dish_id, current_item, quantity);
-			ELSE
-				RAISE EXCEPTION 'Component no:% does not exist.', current_item;
-				RETURN;
-			END IF;
+            IF utils.item_exist(current_item,'COMPONENT') THEN
+                INSERT INTO dishes_components(dish_id, component_id, quantity)
+                VALUES (new_dish_id, utils.find_item(current_item, 'COMPONENT'), quantity);
+            ELSE
+                RAISE EXCEPTION 'Component "%" do not exists.', current_item;
+                RETURN;
+            END IF;
         END LOOP;
     END IF;
 
-    -- Insert additions if any are provided
     IF p_additions IS NOT NULL AND jsonb_array_length(p_additions) > 0 THEN
-        -- Loop through each addition and insert it into the dishes_additions table
         FOR addition IN SELECT * FROM jsonb_array_elements(p_additions) LOOP
 			current_item := (addition->>'id')::int;
 
@@ -462,6 +457,31 @@ BEGIN
     is_partner = p_status
     WHERE p_provider_id = prod_id;
     RAISE NOTICE 'Provider has been updated.';
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE tools.update_dishes_components(dish_id_input INT, components_json JSONB)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM dishes_components
+    WHERE dish_id = dish_id_input;
+
+    INSERT INTO dishes_components (dish_id, component_id, quantity)
+    SELECT 
+        dish_id_input AS dish_id,
+        (component->>'component_id')::INT AS component_id,
+        (component->>'quantity')::INT AS quantity
+    FROM 
+        JSONB_ARRAY_ELEMENTS(components_json) AS component;
+
+    IF NOT EXISTS (SELECT 1 FROM dishes WHERE dish_id = dish_id_input) THEN
+        RAISE EXCEPTION 'Dish with id % does not exist', dish_id_input;
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM dishes_components WHERE quantity < 0) THEN
+        RAISE EXCEPTION 'Negative quantities are not allowed';
+    END IF;
 END;
 $$;
 

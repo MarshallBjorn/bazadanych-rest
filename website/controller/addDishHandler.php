@@ -16,16 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $price = $_POST['price'];
     $description = $_POST['description'];
 
-    $components_text = isset($_POST['components']) ? $_POST['components'] : '';
-    $additions_text = isset($_POST['additions']) ? $_POST['additions'] : '';
+    $components_text = isset($_POST['components']) ? $_POST['components'] : '[]';
+    $additions_text = isset($_POST['additions']) ? $_POST['additions'] : '[]';
     
-    $components = $components_text ? array_map('trim', explode(',', $components_text)) : [];
-    $additions = $additions_text ? array_map('trim', explode(',', $additions_text)) : [];
-
     $query = "CALL tools.add_new_dish($1, $2, $3, $4, $5, $6)";
     
     $result = pg_query_params($db, $query, [
-        $dish_name, $dish_type, $price, $description, json_encode($components), json_encode($additions)
+        $dish_name, $dish_type, $price, $description, $components_text, $additions_text
     ]);
     
     if ($result) {
