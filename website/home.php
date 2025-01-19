@@ -18,7 +18,7 @@
         <script type="text/javascript" src="scripts/logout.js"></script>
         <script type="text/javascript" src="scripts/dataEdit.js"></script>
         <script type="text/javascript" src="scripts/newEmployeeAdd.js"></script>
-        <script type="text/javascript" src="scripts/editDish.js"></script>
+        <script type="text/javascript" src="scripts/dynamicDishSelect.js"></script>
     </head>
     <body>
         <div id="app">
@@ -41,29 +41,49 @@
             </div>
             <div id="content">
                 <div id="new-order">
-                <h2>Nowe zamówienie</h2>
-                <form action="./controller/newOrderHandler.php" method="POST">
-                    <label for="payment_method_name">Metoda płatności*</label>
-                    <input type="text" id="payment_method_name" name="payment_method_name" required />
-                    <label for="client_contact">Telefon*</label>
-                    <input type="text" id="client_contact" name="client_contact" required />
-                    <label for="note">Notatka</label>
-                    <textarea id="note" name="note"></textarea>
-                    <label>Ulica*</label>
-                    <input type="text" name="street" required>
-                    <label>Miasto*</label>
-                    <input type="text" name="locality" required>
-                    <label>Kod pocztowy*</label>
-                    <input type="text" name="post_code" required>
-                    <label>Numer budynku:*</label>
-                    <input type="text" name="building_num" required>
-                    <label for="dishes">Dania (JSON)*</label>
-                    <textarea id="dishes" name="dishes" required></textarea>
-                    <label for="additions">Dodatki (JSON)</label>
-                    <textarea id="additions" name="additions"></textarea>
+                    <h2>Nowe zamówienie</h2>
+                    <form id="order-form" action="./controller/placeNewOrderHandler.php" method="POST">
+                        <label for="payment_method_name">Metoda płatności*</label>
+                        <select id="payment_method_name" name="payment_method_name" required>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Online Payment">Online Payment</option>
+                        </select>
+                        <label for="client_contact">Telefon*</label>
+                        <input type="text" id="client_contact" name="client_contact" required />
+                        <label for="note">Notatka</label>
+                        <textarea id="note" name="note"></textarea>
+                        <label>Ulica*</label>
+                        <input type="text" name="street" required />
+                        <label>Miasto*</label>
+                        <input type="text" name="locality" required />
+                        <label>Kod pocztowy*</label>
+                        <input type="text" name="post_code" required />
+                        <label>Numer budynku*</label>
+                        <input type="text" name="building_num" required />
+
+                <div id="menu-section">
+                    <button type="button" onclick="fetchMenu('dishes')">Wybierz dania</button>
+                    <button type="button" onclick="fetchMenu('additions')">Wybierz dodatki</button>
+
+                    <div id="menu-items" class="hidden">
+                        <h3>Lista dostępnych pozycji</h3>
+                        <div id="menu-list"></div>
+                            <button type="button" onclick="closeMenu()">Zamknij</button>
+                        </div>
+                    </div>
+                    <input type="hidden" id="dishes" name="dishes" value="[]" />
+                    <input type="hidden" id="additions" name="additions" value="[]" />
+
+                    <div id="dishes-summary">
+                        <h4>Wybrane dania</h4>
+                    </div>
+                    <div id="additions-summary">
+                        <h4>Wybrane dodatki</h4>
+                    </div>
 
                     <button type="submit">Dodaj zamówienie</button>
-                </form>
+                    </form>
                 </div>
 
                 <div id="item-list">
@@ -225,7 +245,9 @@
                         echo "<p class='staff-item-element'><strong>Data zatrudnienia:</strong> {$row['fhire_date']}</p>";
                         echo "<p class='staff-item-element'><strong>Status:</strong> {$row['fstatus']}</p>";
                         echo "<button type='button' onclick='toggleEditSection(this)'>Edytuj</button>";
+                        echo "<button type='button' class='cancel_button'>Zawieś</button>";
                         echo "<button type='button' class='cancel_button'>Zwolnij</button>";
+                        
                     
                         echo "<div class='edit-section'>";
                         echo "<form method='POST' action='./controller/editStaffHandler.php'>";
