@@ -177,8 +177,8 @@ BEGIN
     LOOP
         FETCH curs INTO result_record;
         EXIT WHEN NOT FOUND;
-
-        RETURN NEXT result_record;
+        -- Zwrócenie danych z typami zgodnymi z oczekiwaniami (text)
+        RETURN NEXT (result_record.order_id, result_record.dish_name::text, result_record.quantity);
     END LOOP;
     CLOSE curs;
     RETURN;
@@ -201,8 +201,8 @@ BEGIN
     LOOP
         FETCH curs INTO result_record;
         EXIT WHEN NOT FOUND;
-
-        RETURN NEXT result_record;
+        -- Zwrócenie danych z typami zgodnymi z oczekiwaniami (text)
+        RETURN NEXT (result_record.order_id, result_record.addition_name::text, result_record.quantity);
     END LOOP;
     CLOSE curs;
     RETURN;
