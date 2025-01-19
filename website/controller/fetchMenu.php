@@ -16,7 +16,7 @@ if ($type === 'dishes') {
               WHERE (dish).is_served = TRUE";
 } elseif ($type === 'additions') {
     $query = "SELECT (addition).addition_id, (addition).addition_name, (addition).price, (addition).availability 
-              FROM display.list_all_additions() AS addition(addition_id INT, addition_name VARCHAR, price NUMERIC, availability BOOLEAN)
+              FROM display.list_all_additions() AS addition(addition_id INT, addition_name VARCHAR, price NUMERIC, prod_name VARCHAR, availability BOOLEAN)
               WHERE (addition).availability = TRUE";
 }
 

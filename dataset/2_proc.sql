@@ -36,7 +36,7 @@ BEGIN
         -- Loop through each component and insert it into the dishes_components table
         FOR component IN SELECT * FROM jsonb_array_elements(p_components) LOOP
             -- Extract the component_id and quantity from each JSON element
-            current_item := (component->>'component_id')::int;
+            current_item := (component->>'id')::int;
             quantity := (component->>'quantity')::int;
 
 			SELECT EXISTS (SELECT 1 FROM components WHERE components.component_id = current_item) INTO do_exists;
@@ -56,7 +56,7 @@ BEGIN
     IF p_additions IS NOT NULL AND jsonb_array_length(p_additions) > 0 THEN
         -- Loop through each addition and insert it into the dishes_additions table
         FOR addition IN SELECT * FROM jsonb_array_elements(p_additions) LOOP
-			current_item := (addition->>'addition_id')::int;
+			current_item := (addition->>'id')::int;
 
 			SELECT EXISTS(SELECT 1 FROM additions WHERE addition_id = current_item) INTO do_exists;
 
@@ -120,7 +120,7 @@ BEGIN
 
     IF p_additions IS NOT NULL AND jsonb_array_length(p_additions) > 0 THEN
         FOR i IN 0..(jsonb_array_length(p_additions)-1) LOOP
-            current_item := p_additions->i->>'addition_name';
+            current_item := p_additions->i->>'name';
             quantity := (p_additions->i->>'quantity')::int;
 
             IF utils.item_exist(current_item,'ADDITION') THEN
