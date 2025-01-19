@@ -155,6 +155,24 @@
                             "<p class='item-element'><strong>Dostawca:</strong> $row[prod_name]</p>" .
                             "<p class='item-element'><strong>Dostępne:</strong> ". ($row['availability'] == 't' ? 'Tak' : 'Nie') ."</p>";
                         echo "<button type=button onclick='toggleEditSection(this)'> Edytuj </button>";
+                        
+                        echo "<div class='edit-section'";
+                        echo "<form method='POST' action='./controller/editComponentHandler.php'>";
+                        echo "<input type='hidden' id='edit-name' name='component_id' value='{$row['component_id']}'/>";
+                        echo "<label for='edit-name'>Nazwa:</label>";
+                        echo "<input type='text' id='edit-name' name='component_name' value='{$row['component_name']}' required />";
+                        echo "<label for='edit-price'>Cena:</label>";
+                        echo "<input type='text' id='edit-type' name='component_price' value='{$row['price']}' required />";
+                        echo "<label for='edit-type'>Dostawca:</label>";
+                        echo "<input type='text' id='edit-served' name='prod_name' value='{$row['prod_name']}'/>";
+                        echo "<label for='edit-name'>Dostępne:</label>";
+                        echo "<select id='edit-served' name='is_served'>";
+                        echo "<option value='t'" . ($row['availability'] == 't' ? ' selected' : '') . ">Tak</option>";
+                        echo "<option value='f'" . ($row['availability'] == 'f' ? ' selected' : '') . ">Nie</option>";
+                        echo "</select>";
+                        echo "<button type='submit'>Zapisz</button>";
+                        echo "</form>";
+                        echo "</div>";
                         echo "</div>";
                     }
 
@@ -234,7 +252,7 @@
                         echo "<p class='staff-item-element'><strong>Stanowisko:</strong> {$row['fposition']}</p>";
                         echo "<p class='staff-item-element'><strong>Telefon:</strong> {$row['fcontact']}</p>";
                         echo "<p class='staff-item-element'><strong>Adres:</strong> {$row['faddress']}</p>";
-                        echo "<p class='staff-item-element'><strong>Płeć:</strong> {$row['fgender']}</p>";
+                        echo "<p class='staff-item-element'><strong>Płeć:</strong> " . ($row['fgender'] == 't' ? 'Mężczyzna' : 'Kobieta') . "</p>";
                         echo "<p class='staff-item-element'><strong>Data urodzenia:</strong> {$row['fbirthday']}</p>";
                         echo "<p class='staff-item-element'><strong>Data zatrudnienia:</strong> {$row['fhire_date']}</p>";
                         echo "<p class='staff-item-element'><strong>Status:</strong> {$row['fstatus']}</p>";
@@ -259,8 +277,12 @@
                         echo "</select>";
                         echo "<label for='edit-birthday'>Data urodzenia:</label>";
                         echo "<input type='date' id='edit-birthday' name='fbirthday' value='{$row['fbirthday']}' required />";
-                        echo "<label for='edit-hire-date'>Data zatrudnienia:</label>";
-                        echo "<input type='date' id='edit-hire-date' name='fhire_date' value='{$row['fhire_date']}' disabled />";
+                        echo "<label for='edit-status'>Status: </label>";
+                        echo "<select id='edit-status' name='fstatus'>";
+                        echo "<option value='HIRED'" . ($row['fstatus'] == 'HIRED' ? ' selected' : '') . ">Zatrudniony/na</option>";
+                        echo "<option value='SUSPENDED'" . ($row['fstatus'] == 'SUSPENDED' ? ' selected' : '') . ">Zawieszony/na</option>";
+                        echo "<option value='FIRED'" . ($row['fstatus'] == 'FIRED' ? ' selected' : '') . ">Zwolniony/na</option>";
+                        echo "</select>";
                         echo "<button type='submit'>Zapisz</button>";
                         echo "</form>";
                         echo "</div>";

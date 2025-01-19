@@ -18,10 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contact = $_POST['fcontact'];
     $gender = $_POST['fgender'];
     $birthday = $_POST['fbirthday'];
+    $status = $_POST['fstatus'];
 
-    $query = "CALL tools.update_staff($1,$2,$3,$4,$5,$6,$7)";
+    $query = "CALL tools.update_staff($1,$2,$3,$4,$5,$6,$7,$8)";
     $result = pg_query_params($db, $query, [
-        $pesel, $firstname, $lastname, $position, $contact, $gender, $birthday
+        $pesel, $firstname, $lastname, $position, $contact, $gender, $birthday, $status
     ]);
 
     if ($result) {

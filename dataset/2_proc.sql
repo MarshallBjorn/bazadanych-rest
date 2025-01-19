@@ -375,7 +375,8 @@ CREATE OR REPLACE PROCEDURE tools.update_staff(
     p_position varchar,
     p_contact varchar,
     p_gender boolean,
-    p_birthday date
+    p_birthday date,
+    p_status text
 ) LANGUAGE plpgsql AS $$
 DECLARE
     staff_id varchar;
@@ -388,7 +389,8 @@ BEGIN
     position = p_position,
     contact = p_contact,
     gender = p_gender,
-    birthday = p_birthday
+    birthday = p_birthday,
+    "status" = p_status
     WHERE pesel = staff_id;
     RAISE NOTICE 'Person info has been updated.';
 END;
@@ -472,14 +474,5 @@ BEGIN
     SET order_status = 4
     WHERE p_order_id = order_id;
     RAISE NOTICE 'Order % canceled', p_order_id;
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE tools.set_employee_status(p_pesel varchar, p_status varchar)
-LANGUAGE plpgsql AS $$
-BEGIN
-    UPDATE staff SET
-    "status" = p_status
-    WHERE p_pesel = pesel;
 END;
 $$;

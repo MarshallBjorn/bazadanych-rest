@@ -20,10 +20,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $query = "CALL tools.update_addition($1, $2, $3, $4, $5)";
     $params = [$addition_id, $addition_name, $price, $prod_name, $is_served];
 
-    $result = pg_query_params($db, $query, $params);
-
+    $result = @pg_query_params($db, $query, $params);
+    
     if ($result) {
-        $_SESSION['message'] = "Dodatek został pomyślnie zaktualizowany.";
+        $_SESSION['message'] = "Danie zostało pomyślnie zaktualizowane.";
         header("Location: ../home.php");
     } else {
         $_SESSION['message'] = "Błąd podczas aktualizacji: " . pg_last_error($db);

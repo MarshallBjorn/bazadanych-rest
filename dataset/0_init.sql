@@ -24,7 +24,7 @@ CREATE TABLE "staff" (
     "contact" varchar(11) UNIQUE NOT NULL,
     "gender" boolean NOT NULL,
     "birthday" date NOT NULL,
-    "status" text NOT NULL DEFAULT 'hired' CHECK("status" IN ('hired', 'suspended', 'fired')),
+    "status" text NOT NULL DEFAULT 'HIRED' CHECK("status" IN ('HIRED', 'SUSPENDED', 'FIRED')),
     "hire_date" date NOT NULL DEFAULT NOW(),
     FOREIGN KEY ("address") REFERENCES "addresses"("address_id") ON DELETE CASCADE
 );
