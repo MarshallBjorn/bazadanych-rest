@@ -146,15 +146,17 @@ CREATE TABLE "orders_additions" (
     FOREIGN KEY("order_id") REFERENCES "orders"("order_id")
 );
 
-COPY dishes(dish_name, dish_type, price, description) FROM '/docker-entrypoint-initdb.d/data/dishes.csv' DELIMITER ';' CSV HEADER;
 COPY addresses(street, locality, post_code, building_num) FROM '/docker-entrypoint-initdb.d/data/addresses.csv' DELIMITER ';' CSV HEADER;
 COPY providers(prod_name, contact, address) FROM '/docker-entrypoint-initdb.d/data/providers.csv' DELIMITER ';' CSV HEADER;
+COPY staff(pesel, firstname, lastname, position, address, contact, gender, birthday, hire_date) FROM '/docker-entrypoint-initdb.d/data/staff.csv' DELIMITER ',' CSV HEADER;
 COPY components(component_name, prod_id, price, availability) FROM '/docker-entrypoint-initdb.d/data/components.csv' DELIMITER ';' CSV HEADER;
 COPY additions(addition_name, provider, price, availability) FROM '/docker-entrypoint-initdb.d/data/additions.csv' DELIMITER ';' CSV HEADER;
+COPY dishes(dish_name, dish_type, price, description) FROM '/docker-entrypoint-initdb.d/data/dishes.csv' DELIMITER ';' CSV HEADER;
 COPY dishes_components(dish_id, component_id, quantity) FROM '/docker-entrypoint-initdb.d/data/dishes_components.csv' DELIMITER ';' CSV HEADER;
 COPY dishes_additions(addition_id, dish_id) FROM '/docker-entrypoint-initdb.d/data/dishes_additions.csv' DELIMITER ';' CSV HEADER;
-COPY staff(pesel, firstname, lastname, position, address, contact, gender, birthday, hire_date) FROM '/docker-entrypoint-initdb.d/data/staff.csv' DELIMITER ',' CSV HEADER;
 COPY orders(order_id,payment_method,deliverer,order_status,ordered_at,last_status_update,client_contact,"address",note,summary) FROM '/docker-entrypoint-initdb.d/data/orders.csv' DELIMITER ',' CSV HEADER;
+COPY orders_dishes(order_id, dish_id, quantity) FROM '/docker-entrypoint-initdb.d/data/orders_dishes.csv' DELIMITER ',' CSV HEADER;
+COPY orders_additions(order_id, addition_id, quantity) FROM '/docker-entrypoint-initdb.d/data/orders_additions.csv' DELIMITER ',' CSV HEADER;
 INSERT INTO deliverers(pesel) SELECT pesel FROM staff WHERE position='Deliverer';
 
 CREATE SCHEMA utils;
