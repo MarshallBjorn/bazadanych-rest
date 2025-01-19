@@ -114,8 +114,8 @@ CREATE TABLE "orders" (
     "payment_method" int NOT NULL,
     "deliverer" varchar(11),
     "order_status" int NOT NULL DEFAULT 1,
-    "ordered_at" timestamp NOT NULL DEFAULT NOW(),
-    "last_status_update" timestamp NOT NULL DEFAULT NOW(),
+    "ordered_at" timestamp NOT NULL DEFAULT NOW()::timestamp(0),
+    "last_status_update" timestamp NOT NULL DEFAULT NOW()::timestamp(0),
     "client_contact" varchar(11) NOT NULL,
     "address" int NOT NULL, 
     "note" text,
@@ -154,7 +154,7 @@ COPY additions(addition_name, provider, price, availability) FROM '/docker-entry
 COPY dishes(dish_name, dish_type, price, description) FROM '/docker-entrypoint-initdb.d/data/dishes.csv' DELIMITER ';' CSV HEADER;
 COPY dishes_components(dish_id, component_id, quantity) FROM '/docker-entrypoint-initdb.d/data/dishes_components.csv' DELIMITER ';' CSV HEADER;
 COPY dishes_additions(addition_id, dish_id) FROM '/docker-entrypoint-initdb.d/data/dishes_additions.csv' DELIMITER ';' CSV HEADER;
-COPY orders(order_id,payment_method,deliverer,order_status,ordered_at,last_status_update,client_contact,"address",note,summary) FROM '/docker-entrypoint-initdb.d/data/orders.csv' DELIMITER ',' CSV HEADER;
+COPY orders(payment_method,deliverer,order_status,ordered_at,last_status_update,client_contact,"address",note,summary) FROM '/docker-entrypoint-initdb.d/data/orders.csv' DELIMITER ',' CSV HEADER;
 COPY orders_dishes(order_id, dish_id, quantity) FROM '/docker-entrypoint-initdb.d/data/orders_dishes.csv' DELIMITER ',' CSV HEADER;
 COPY orders_additions(order_id, addition_id, quantity) FROM '/docker-entrypoint-initdb.d/data/orders_additions.csv' DELIMITER ',' CSV HEADER;
 INSERT INTO deliverers(pesel) SELECT pesel FROM staff WHERE position='Deliverer';

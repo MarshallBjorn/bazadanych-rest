@@ -99,21 +99,28 @@ BEGIN
     END IF;
 
     SELECT tools.new_address(p_address) INTO address_id;
-    INSERT INTO orders(payment_method, client_contact, address, note)
+    INSERT INTO orders(payment_method, client_contact, "address", note)
     VALUES(current_payment_method, p_client_contact, address_id, p_note)
     RETURNING order_id INTO new_order_id;
 
-    IF p_dishes IS NOT NULL AND jsonb_array_length(p_dishes) > 0 THEN
-        FOR i IN 0..(jsonb_array_length(p_dishes)-1) LOOP
-            current_item := p_dishes->i->>'dish_name';
-            quantity := (p_dishes->i->>'quantity')::int;
+	PERFORM setval(pg_get_serial_sequence('orders', 'order_id'), MAX(order_id) + 1) 
+    	FROM orders;
 
-            IF utils.item_exist(current_item,'DISH') AND tools.is_servable(current_item) THEN
+    IF p_dishes IS NOT NULL AND jsonb_array_length(p_dishes) > 0 THEN
+        FOR dish_record IN SELECT * FROM jsonb_array_elements(p_dishes) LOOP
+            -- Extract details from the JSON object
+            dish_id := (dish_record->>'id')::int;
+            dish_name := dish_record->>'name';
+            dish_price := (dish_record->>'price')::numeric;
+            dish_quantity := (dish_record->>'quantity')::int;
+
+            -- Check if the dish exists in the system
+            IF utils.item_exist(dish_name, 'DISH') THEN
+                -- Insert into orders_dishes
                 INSERT INTO orders_dishes(dish_id, order_id, quantity)
-                VALUES (utils.find_item(current_item, 'DISH'), new_order_id, quantity);
+                VALUES (dish_id, new_order_id, dish_quantity);
             ELSE
-                RAISE EXCEPTION 'Dish "%" do not exists.', current_item;
-                RETURN;
+                RAISE EXCEPTION 'Dish "%" does not exist.', dish_name;
             END IF;
         END LOOP;
     END IF;
@@ -132,7 +139,8 @@ BEGIN
             END IF;
         END LOOP;
     END IF;
-    summ := tools.order_sum(new_order_id);
+
+    summ := utils.order_sum(new_order_id);
     UPDATE orders SET summary = summ WHERE new_order_id = order_id;
 END;
 $$;

@@ -161,6 +161,54 @@ END;
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION display.list_order_dishes(p_order INT)
+RETURNS SETOF RECORD AS
+$$
+DECLARE
+    curs CURSOR FOR
+        SELECT order_id, dish_name, quantity
+        FROM orders_dishes
+        INNER JOIN dishes
+        ON dishes.dish_id = orders_dishes.dish_id
+        WHERE order_id = p_order;
+    result_record RECORD;
+BEGIN
+    OPEN curs;
+    LOOP
+        FETCH curs INTO result_record;
+        EXIT WHEN NOT FOUND;
+
+        RETURN NEXT result_record;
+    END LOOP;
+    CLOSE curs;
+    RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION display.list_order_additions(p_order INT)
+RETURNS SETOF RECORD AS
+$$
+DECLARE
+    curs CURSOR FOR
+        SELECT order_id, addition_name, quantity
+        FROM orders_additions
+        INNER JOIN additions
+        ON additions.addition_id = orders_additions.addition_id
+        WHERE order_id = p_order;
+    result_record RECORD;
+BEGIN
+    OPEN curs;
+    LOOP
+        FETCH curs INTO result_record;
+        EXIT WHEN NOT FOUND;
+
+        RETURN NEXT result_record;
+    END LOOP;
+    CLOSE curs;
+    RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION display.list_all_orders()
 RETURNS TABLE (ord_id int, pay_meth varchar, summ numeric, deliv varchar, ordr_stat varchar, ord_at timestamp, last_update timestamp, client varchar, address_string text, cust_note text) AS
 $$
@@ -366,3 +414,4 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql;
+
