@@ -276,43 +276,36 @@ DECLARE
     next_status_id int;
     next_status_name varchar;
 BEGIN
-    -- Get the current status of the order
     SELECT order_status INTO current_status_id
     FROM orders
     WHERE order_id = p_order_id;
 
-    -- If the order does not exist, raise an exception
     IF current_status_id IS NULL THEN
         RAISE EXCEPTION 'Order % does not exist.', p_order_id;
     END IF;
 
-    -- Determine the next status in the cycle
     CASE current_status_id
-        WHEN 1 THEN next_status_id := 2;  -- PROCESSING -> IN DELIVERY
-        WHEN 2 THEN next_status_id := 3;  -- IN DELIVERY -> DELIVERED
+        WHEN 1 THEN next_status_id := 2;
+        WHEN 2 THEN next_status_id := 3;
         WHEN 3 THEN
-            RAISE EXCEPTION 'DELIVERED is the last possible order status.';  -- DELIVERED -> PROCESSING
+            RAISE EXCEPTION 'DELIVERED is the last possible order status.';
         ELSE
             RAISE EXCEPTION 'Invalid current status ID % for order %', current_status_id, p_order_id;
     END CASE;
 
-    -- Get the name of the next status (for debugging)
     SELECT status INTO next_status_name
     FROM order_statuses
     WHERE order_status_id = next_status_id;
 
-    -- Update the order's status
     UPDATE orders
     SET order_status = next_status_id,
-        last_status_update = NOW()
+        last_status_update = NOW()::timestamp(0)
     WHERE order_id = p_order_id;
 
-    -- If the new status is "IN DELIVERY", call utils.assign_deliverer_to_order
     IF next_status_name = 'IN DELIVERY' THEN
-        PERFORM utils.assign_deliverer_to_order(p_order_id);  -- Call the deliverer assignment function
+        PERFORM utils.assign_deliverer_to_order(p_order_id);
     END IF;
 
-    -- Confirm the status update
     RAISE NOTICE 'Order % status updated to %', p_order_id, next_status_name;
 END;
 $$

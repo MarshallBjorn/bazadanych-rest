@@ -382,7 +382,6 @@ DECLARE
     staff_id varchar;
 BEGIN
     staff_id := utils.find_item_alt(p_pesel);
-
     UPDATE staff SET
     firstname = p_new_firstname,
     lastname = p_new_lastname,
