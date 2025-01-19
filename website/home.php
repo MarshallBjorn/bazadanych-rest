@@ -19,6 +19,9 @@
         <script type="text/javascript" src="scripts/dataEdit.js"></script>
         <script type="text/javascript" src="scripts/newEmployeeAdd.js"></script>
         <script type="text/javascript" src="scripts/dynamicDishSelect.js"></script>
+        <script type="text/javascript" src="scripts/cancelOrder.js"></script>
+        <script type="text/javascript" src="scripts/updateOrderStatus.js"></script>
+        <script type="text/javascript" src="scripts/dynamicComponentSelect.js"></script>
     </head>
     <body>
         <div id="app">
@@ -195,34 +198,39 @@
                         echo "</div>";
                         echo "</div>";
                     }
-
                     ?>
                 </div>
 
                 <div id="dish-add">
                     <h2>Nowe danie</h2>
                     <form action="./controller/addDishHandler.php" method="POST">
-                    <label for="dish_name">Nazwa dania*</label>
-                    <input type="text" id="dish_name" name="dish_name" required />
-
-                    <label for="dish_type">Typ dania*</label>
-                    <input type="text" id="dish_type" name="dish_type" required />
-
-                    <label for="price">Cena*</label>
-                    <input type="number" id="price" name="price" step="0.01" required />
-
-                    <label for="description">Opis dania*</label>
-                    <textarea id="description" name="description" required></textarea>
-
-                    <label for="components">Składniki (opcjonalnie)</label>
-                    <input type="text" id="components" name="components" />
-
-                    <label for="additions">Dodatki (opcjonalnie)</label>
-                    <input type="text" id="additions" name="additions" />
-
-                    <button type="submit">Dodaj danie</button>
+                        <label for="dish_name">Nazwa dania*</label>
+                        <input type="text" id="dish_name" name="dish_name" required />
+                        
+                        <label for="dish_type">Typ dania*</label>
+                        <input type="text" id="dish_type" name="dish_type" required />
+                        
+                        <label for="price">Cena*</label>
+                        <input type="number" id="price" name="price" step="0.01" required />
+                        
+                        <label for="description">Opis dania*</label>
+                        <textarea id="description" name="description" required></textarea>
+                        
+                        <label for="components">Składniki</label>
+                        <div>
+                            <button type="button" onclick="fetchMenu2('components')">Wybierz składniki</button>
+                            <div id="menu-items-2" class="hidden">
+                                <h3>Lista dostępnych składników</h3>
+                                <div id="menu-list-2"></div>
+                                <button type="button" onclick="closeMenu2()">Zamknij</button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="components" name="components" value="[]" />
+                        <div id="components-summary">
+                            <h4>Wybrane składniki</h4>
+                        </div>
+                        <button type="submit">Dodaj danie</button>
                     </form>
-
                 </div>
 
                 <div id="employee-list">
@@ -277,10 +285,7 @@
                         echo "<p class='staff-item-element'><strong>Data zatrudnienia:</strong> {$row['fhire_date']}</p>";
                         echo "<p class='staff-item-element'><strong>Status:</strong> {$row['fstatus']}</p>";
                         echo "<button type='button' onclick='toggleEditSection(this)'>Edytuj</button>";
-                        echo "<button type='button' class='cancel_button'>Zawieś</button>";
-                        echo "<button type='button' class='cancel_button'>Zwolnij</button>";
                         
-                    
                         echo "<div class='edit-section'>";
                         echo "<form method='POST' action='./controller/editStaffHandler.php'>";
                         echo "<input type='hidden' name='staff_id' value='{$row['staff_id']}' />";
@@ -315,33 +320,93 @@
 
                 <div id="order-list">
                     <h2>Zamówienia</h2>
-                <?php
-                    $query = "SELECT * FROM display.list_all_orders()";
-                    $result = pg_query($db, $query);
+                    <?php
+                        $query = "SELECT * FROM display.list_all_orders() ORDER BY ordr_stat, ord_at";
+                        $result = pg_query($db, $query);
 
-                    if (!$result) {
-                        echo "Wystąpił błąd podczas pobierania zamówień: " . pg_last_error($db);
-                        exit;
-                    }
-
-                    while ($row = pg_fetch_assoc($result)) {
-                        echo "<div class='order-item'>";
-                        echo "<p class='order-element'><strong>ID zamówienia:</strong> {$row['ord_id']}</p>";
-                        echo "<p class='order-element'><strong>Metoda płatności:</strong> {$row['pay_meth']}</p>";
-                        echo "<p class='order-element'><strong>Suma:</strong> {$row['summ']}</p>";
-                        if($row['deliv'] != "") {
-                            echo "<p class='order-element'><strong>Dostawca:</strong> {$row['deliv']}</p>";
+                        if (!$result) {
+                            echo "Wystąpił błąd podczas pobierania zamówień: " . pg_last_error($db);
+                            exit;
                         }
-                        echo "<p class='order-element'><strong>Status zamówienia:</strong> {$row['ordr_stat']}</p>";
-                        echo "<p class='order-element'><strong>Data zamówienia:</strong> {$row['ord_at']}</p>";
-                        echo "<p class='order-element'><strong>Ostatnia aktualizacja:</strong> {$row['last_update']}</p>";
-                        echo "<p class='order-element'><strong>Klient:</strong> {$row['client']}</p>";
-                        echo "<p class='order-element'><strong>Numer adresu:</strong> {$row['address_string']}</p>";
-                        echo "<p class='order-element'><strong>Notatka klienta:</strong> {$row['cust_note']}</p>";
-                        echo "<button type='button' onclick='editOrder({$row['ord_id']})'>Zmień status</button>";
-                        echo "<button type='button' class='cancel_button' onclick='cancelOrder({$row['ord_id']})'>Anuluj zamówienie</button>";
-                        echo "</div>";
-                    }
+
+                        $groups = [
+                            'W trakcie' => [],
+                            'W doręczeniu' => [],
+                            'Dostarczone' => [],
+                            'Anulowane' => []
+                        ];
+
+                        while ($row = pg_fetch_assoc($result)) {
+                            switch ($row['ordr_stat']) {
+                                case 'PROCESSING':
+                                    $groups['W trakcie'][] = $row;
+                                    break;
+                                case 'IN DELIVERY':
+                                    $groups['W doręczeniu'][] = $row;
+                                    break;
+                                case 'COMPLETED':
+                                    $groups['Dostarczone'][] = $row;
+                                    break;
+                                case 'CANCELED':
+                                    $groups['Anulowane'][] = $row;
+                                    break;
+                                default:
+                                    echo "Nieznany status: {$row['ordr_stat']}<br>";  // Debugowanie
+                                    break;
+                            }
+                        }                   
+
+                        foreach ($groups as $status => $orders) {
+                            echo "<h2>{$status}</h2>";
+                            if (count($orders) === 0) {
+                                echo "<p>Brak zamówień w tej kategorii.</p>";
+                            } else {
+                                foreach ($orders as $order) {
+                                    echo "<div class='order-item'>";
+                                    echo "<p class='order-element'><strong>ID zamówienia:</strong> {$order['ord_id']}</p>";
+                                    echo "<p class='order-element'><strong>Metoda płatności:</strong> {$order['pay_meth']}</p>";
+                                    echo "<p class='order-element'><strong>Suma:</strong> {$order['summ']}</p>";
+                                    if ($order['deliv'] != "") {
+                                        echo "<p class='order-element'><strong>Dostawca:</strong> {$order['deliv']}</p>";
+                                    }
+                                    echo "<p class='order-element'><strong>Status zamówienia:</strong> {$order['ordr_stat']}</p>";
+                                    echo "<p class='order-element'><strong>Data zamówienia:</strong> {$order['ord_at']}</p>";
+                                    echo "<p class='order-element'><strong>Ostatnia aktualizacja:</strong> {$order['last_update']}</p>";
+                                    echo "<p class='order-element'><strong>Klient:</strong> {$order['client']}</p>";
+                                    echo "<p class='order-element'><strong>Numer adresu:</strong> {$order['address_string']}</p>";
+                                    echo "<p class='order-element'><strong>Notatka klienta:</strong> {$order['cust_note']}</p>";
+                                    $dish_query = "SELECT order_id, dish_name, quantity FROM display.list_order_dishes({$order['ord_id']}) AS dishes(order_id INT, dish_name TEXT, quantity INT)";
+                                    $dish_result = pg_query($db, $dish_query);
+                                    if ($dish_result) {
+                                        echo "<h3>Dania:</h3><ul>";
+                                        while ($dish = pg_fetch_assoc($dish_result)) {
+                                            echo "<li>{$dish['dish_name']} - Ilość: {$dish['quantity']}</li>";
+                                        }
+                                        echo "</ul>";
+                                    } else {
+                                        echo "<p>Brak dań w zamówieniu.</p>";
+                                    }
+                    
+                                    $addition_query = "SELECT order_id, addition_name, quantity FROM display.list_order_additions({$order['ord_id']}) AS additions(order_id INT, addition_name TEXT, quantity INT)";
+                                    $addition_result = pg_query($db, $addition_query);
+                                    if ($addition_result) {
+                                        echo "<h3>Dodatki:</h3><ul>";
+                                        while ($addition = pg_fetch_assoc($addition_result)) {
+                                            echo "<li>{$addition['addition_name']} - Ilość: {$addition['quantity']}</li>";
+                                        }
+                                        echo "</ul>";
+                                    } else {
+                                        echo "<p>Brak dodatków w zamówieniu.</p>";
+                                    }
+                    
+                                    if ($order['ordr_stat'] != 'COMPLETED' && $order['ordr_stat'] != 'CANCELED') {
+                                        echo "<button type='button' onclick='updateOrderStatus({$order['ord_id']})'>Zmień status</button>";
+                                        echo "<button type='button' class='cancel_button' onclick='cancelOrder({$order['ord_id']})'>Anuluj zamówienie</button>";
+                                    }
+                                    echo "</div>";  
+                                }
+                            }
+                        }
                     ?>
                 </div>
             </div>

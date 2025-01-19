@@ -6,23 +6,24 @@ if (!isset($_SESSION['logged'])) {
     exit;
 }
 
-$_SESSION['current_view'] = 'order-list';
-
 include '../database/config.php';
+header('Content-Type: application/json');
 
-$order_id = $_POST['ord_id'];
+$data = json_decode(file_get_contents('php://input'), true);
 
-$query = "CALL tools.cancel_order($1)";
-$params = [$order_id];
-
-$result = pg_query_params($db, $query, $params);
-
-if ($result) {
-    $_SESSION['message'] = "Zamówienie zostało anulowane";
-    header("Location: ../home.php");
-} else {
-    $_SESSION['message'] = "Błąd podczas aktualizacji: " . pg_last_error($db);
-    header("Location: ../home.php");
+if (!isset($data['order_id'])) {
+    echo json_encode(['success' => false, 'message' => 'Nie podano ID zamówienia.']);
+    exit;
 }
 
+$order_id = intval($data['order_id']);
+
+$query = "SELECT tools.update_order_status($1)";
+$result = pg_query_params($db, $query, [$order_id]);
+
+if ($result) {
+    echo json_encode(['success' => true, 'message' => 'Status zamówienia został zaktualizowany.']);
+} else {
+    echo json_encode(['success' => false, 'message' => 'Wystąpił błąd podczas aktualizacji: ' . pg_last_error($db)]);
+}
 ?>
