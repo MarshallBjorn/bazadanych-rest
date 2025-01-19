@@ -156,6 +156,41 @@ body {
     display: none;
 }
 
+.menu-item {
+    padding: 10px;
+    max-width: 500px;
+    background-color: #f1f1f1;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.menu-item:hover {
+    background-color: #007BFF;
+    color: white;
+}
+
+.menu-item.selected {
+    background-color: #007BFF;
+    color: white;
+    border: 2px solid #004b8d;
+}
+
+.menu-item button {
+    display: none;
+}
+
+#dishes-summary, #additions-summary {
+    margin-top: 20px;
+    max-width: 500px;
+}
+
+.order-item {
+    padding: 5px 0;
+    border-bottom: 1px solid #ddd;
+}
+
 /* Items List */
 
 #item-list {
@@ -287,6 +322,17 @@ body {
     font-size: 16px;
     border: 1px solid #ddd;
     border-radius: 4px;
+}
+
+#new-order select {
+    width: 100%;
+    max-width: 500px;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
 }
 
 #dish-add form button,

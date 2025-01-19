@@ -1,6 +1,6 @@
-order_id,payment_method,deliverer,order_status,ordered_at,last_status_update,client_contact,address,note,summary
-1,1,,1,2025-01-08 10:00:00,2025-01-08 10:00:00,12345678901,1,"First order note",117.72
-2,2,,1,2025-01-08 10:05:00,2025-01-08 10:05:00,23456789012,2,"Second order note",30.0
-3,3,,1,2025-01-08 10:10:00,2025-01-08 10:10:00,34567890123,3,"Third order note",114.25
-4,1,,1,2025-01-08 10:15:00,2025-01-08 10:15:00,45678901234,4,"Fourth order note",48.48
-5,2,,1,2025-01-08 10:20:00,2025-01-08 10:20:00,56789012345,5,"Fifth order note",12.99
+payment_method,deliverer,order_status,ordered_at,last_status_update,client_contact,address,note,summary
+1,,1,2025-01-08 10:00:00,2025-01-08 10:00:00,12345678901,1,"First order note",117.72
+2,,1,2025-01-08 10:05:00,2025-01-08 10:05:00,23456789012,2,"Second order note",30.0
+3,,1,2025-01-08 10:10:00,2025-01-08 10:10:00,34567890123,3,"Third order note",114.25
+1,,1,2025-01-08 10:15:00,2025-01-08 10:15:00,45678901234,4,"Fourth order note",48.48
+2,,1,2025-01-08 10:20:00,2025-01-08 10:20:00,56789012345,5,"Fifth order note",12.99

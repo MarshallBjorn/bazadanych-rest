@@ -161,6 +161,54 @@ END;
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION display.list_order_dishes(p_order INT)
+RETURNS SETOF RECORD AS
+$$
+DECLARE
+    curs CURSOR FOR
+        SELECT order_id, dish_name, quantity
+        FROM orders_dishes
+        INNER JOIN dishes
+        ON dishes.dish_id = orders_dishes.dish_id
+        WHERE order_id = p_order;
+    result_record RECORD;
+BEGIN
+    OPEN curs;
+    LOOP
+        FETCH curs INTO result_record;
+        EXIT WHEN NOT FOUND;
+
+        RETURN NEXT result_record;
+    END LOOP;
+    CLOSE curs;
+    RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION display.list_order_additions(p_order INT)
+RETURNS SETOF RECORD AS
+$$
+DECLARE
+    curs CURSOR FOR
+        SELECT order_id, addition_name, quantity
+        FROM orders_additions
+        INNER JOIN additions
+        ON additions.addition_id = orders_additions.addition_id
+        WHERE order_id = p_order;
+    result_record RECORD;
+BEGIN
+    OPEN curs;
+    LOOP
+        FETCH curs INTO result_record;
+        EXIT WHEN NOT FOUND;
+
+        RETURN NEXT result_record;
+    END LOOP;
+    CLOSE curs;
+    RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION display.list_all_orders()
 RETURNS TABLE (ord_id int, pay_meth varchar, summ numeric, deliv varchar, ordr_stat varchar, ord_at timestamp, last_update timestamp, client varchar, address_string text, cust_note text) AS
 $$
@@ -207,7 +255,7 @@ END;
 $$
 LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION tools.new_address(p_address jsonb DEFAULT '[]'::jsonb)
+CREATE OR REPLACE FUNCTION tools.new_address(p_address jsonb DEFAULT '{}'::jsonb)
 RETURNS int AS
 $$
 DECLARE
@@ -216,26 +264,33 @@ DECLARE
     in_locality varchar;
     in_post_code varchar;
     in_building_num varchar;
-    do_exists boolean;
 BEGIN
-    IF jsonb_array_length(p_address) = 4 THEN
-        in_street := p_address->>0;
-        in_locality := p_address->>1;
-        in_post_code := p_address->>2;
-        in_building_num := p_address->>3;
-    ELSE
-        RAISE EXCEPTION 'Adress is incorrect.';
+    -- Sprawdzamy, czy obiekt zawiera wymagane pola
+    in_street := p_address->>'street';
+    in_locality := p_address->>'locality';
+    in_post_code := p_address->>'post_code';
+    in_building_num := p_address->>'building_num';
+
+    -- Sprawdzamy, czy wszystkie wymagane dane są obecne
+    IF in_street IS NULL OR in_locality IS NULL OR in_post_code IS NULL OR in_building_num IS NULL THEN
+        RAISE EXCEPTION 'Adress is incorrect. Missing required fields.';
     END IF;
 
+    -- Szukamy istniejącego adresu w bazie danych
     SELECT address_id INTO address_number FROM addresses
-    WHERE street = in_street AND locality = in_locality AND post_code = in_post_code AND building_num = in_building_num; 
+    WHERE street = in_street 
+      AND locality = in_locality 
+      AND post_code = in_post_code 
+      AND building_num = in_building_num; 
 
+    -- Jeśli adres nie istnieje, dodajemy nowy
     IF address_number IS NULL THEN
         INSERT INTO addresses(street, locality, post_code, building_num)
         VALUES (in_street, in_locality, in_post_code, in_building_num)
         RETURNING address_id INTO address_number;
     END IF;
 
+    -- Zwracamy identyfikator adresu
     RETURN address_number;
 END;
 $$ LANGUAGE plpgsql;
@@ -359,3 +414,4 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql;
+
