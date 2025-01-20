@@ -404,8 +404,7 @@ BEGIN
     WHERE order_status_id = next_status_id;
 
     UPDATE orders
-    SET order_status = next_status_id,
-        last_status_update = NOW()::timestamp(0)
+    SET order_status = next_status_id
     WHERE order_id = p_order_id;
 
     IF next_status_name = 'IN DELIVERY' THEN
@@ -463,3 +462,17 @@ END;
 $$
 LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION update_last_status_update()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.last_status_update = NOW()::timestamp(0);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_last_status_update
+BEFORE UPDATE ON orders
+FOR EACH ROW
+WHEN (OLD.order_status IS DISTINCT FROM NEW.order_status)
+EXECUTE FUNCTION update_last_status_update();

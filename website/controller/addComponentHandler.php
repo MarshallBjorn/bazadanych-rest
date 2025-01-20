@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $query = "CALL tools.add_component($1::varchar, $2::varchar, $3::decimal(6,2), $4::boolean)";
     $params = [$component_name, $prod_name, $price, $is_served];
 
-    $result = @pg_query_params($db, $query, $params);
+    $result = pg_query_params($db, $query, $params);
     
     if ($result) {
         $_SESSION['message'] = "Składnik został pomyślnie dodany.";
