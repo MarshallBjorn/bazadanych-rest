@@ -399,7 +399,7 @@ LANGUAGE plpgsql AS $$
 DECLARE
     p_address_id int;
 BEGIN 
-    p_address_id := tools.new_address(p_address);
+    p_address_id := utils.new_address_alt(p_address);
 
     UPDATE providers SET
     prod_name = p_name,
