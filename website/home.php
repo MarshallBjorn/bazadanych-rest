@@ -35,7 +35,11 @@
                 <button type="button" onclick="changeView('item-list')" class="menu">Lista dań</button>
                 <button type="button" onclick="changeView('new-order')" class="menu">Nowe zamówienie</button>
                 <button type="button" onclick="changeView('dish-add')" class="menu">Nowe danie</button>
+                <button type="button" onclick="changeView('component_add')" class="menu">Nowy składnik</button>
+                <button type="button" onclick="changeView('addition_add')" class="menu">Nowy dodatek</button>
+                <button type="button" onclick="changeView('provider_add')" class="menu">Nowy producent</button>
                 <button type="button" onclick="changeView('employee-list')" class="menu">Pracownicy</button>
+                
                 <button type="button" onclick="logout()" class="menu">Wyloguj</button>
                 <div id="date-div">
                     <p id="date"></p>
@@ -65,27 +69,84 @@
                         <label>Numer budynku*</label>
                         <input type="text" name="building_num" required />
 
-                <div id="menu-section">
-                    <button type="button" onclick="fetchMenu('dishes')">Wybierz dania</button>
-                    <button type="button" onclick="fetchMenu('additions')">Wybierz dodatki</button>
+               
 
-                    <div id="menu-items" class="hidden">
-                        <h3>Lista dostępnych pozycji</h3>
-                        <div id="menu-list"></div>
-                            <button type="button" onclick="closeMenu()">Zamknij</button>
+                        <div id="menu-section">
+                            <button type="button" onclick="fetchMenu('dishes')">Wybierz dania</button>
+                            <button type="button" onclick="fetchMenu('additions')">Wybierz dodatki</button>
+
+                            <div id="menu-items" class="hidden">
+                                <h3>Lista dostępnych pozycji</h3>
+                                <div id="menu-list">
+                                    <button type="button" onclick="closeMenu()">Zamknij</button>
+                                </div>
+                            </div>
+                            <input type="hidden" id="dishes" name="dishes" value="[]" />
+                            <input type="hidden" id="additions" name="additions" value="[]" />
+
+                            <div id="dishes-summary">
+                                <h4>Wybrane dania</h4>
+                            </div>
+                            <div id="additions-summary">
+                                <h4>Wybrane dodatki</h4>
+                            </div>
                         </div>
-                    </div>
-                    <input type="hidden" id="dishes" name="dishes" value="[]" />
-                    <input type="hidden" id="additions" name="additions" value="[]" />
+                        <button type="submit">Dodaj zamówienie</button>
+                    </form>
+                </div>  
 
-                    <div id="dishes-summary">
-                        <h4>Wybrane dania</h4>
-                    </div>
-                    <div id="additions-summary">
-                        <h4>Wybrane dodatki</h4>
-                    </div>
+                <div id="component_add">
+                    <h2>Nowy składnik</h2>
+                    <form action="./controller/addComponentHandler.php" method="POST">
+                        <label>Nazwa*</label>
+                        <input type="text" name="comp_name" required />
+                        <label>Producent*</label>
+                        <input type="text" name="prod_name" required />
+                        <label for="price">Cena*</label>
+                        <input type="text" id="create-price" name="price" required />
+                        <label for="availability">Dostępność*</label>
+                        <select id="availability" name="availability" required>
+                            <option value="true">Tak</option>
+                            <option value="false">Nie</option>
+                        </select>
+                        <button type="submit">Dodaj składnik</button>
+                    </form>
+                </div>
 
-                    <button type="submit">Dodaj zamówienie</button>
+                <div id="addition_add">
+                    <h2>Nowy dodatek</h2>
+                    <form action="./controller/addAdditionHandler.php" method="POST">
+                        <label>Nazwa*</label>
+                        <input type="text" name="comp_name" required />
+                        <label>Producent*</label>
+                        <input type="text" name="prod_name" required />
+                        <label for="price">Cena*</label>
+                        <input type="text" id="create-price" name="price" required />
+                        <label for="availability">Dostępność*</label>
+                        <select id="availability" name="availability" required>
+                            <option value="true">Tak</option>
+                            <option value="false">Nie</option>
+                        </select>
+                        <button type="submit">Dodaj dodatek</button>
+                    </form>
+                </div>
+
+                <div id="provider_add">
+                    <h2>Nowy producent</h2>
+                    <form action="./controller/addProviderHandler.php" method="POST">
+                        <label>Nazwa*</label>
+                        <input type="text" name="prod_name" required />
+                        <label>Kontakt*</label>
+                        <input type="text" name="contact" required />
+                        <label>Ulica*</label>
+                        <input type="text" name="street" required />
+                        <label>Miejscowosc*</label>
+                        <input type="text" name="locality" required />
+                        <label>Kod pocztowy*</label>
+                        <input type="text" name="post_code" required />
+                        <label>Numer budynku*</label>
+                        <input type="text" name="building_num" required />
+                        <button type="submit">Dodaj składnik</button>
                     </form>
                 </div>
 

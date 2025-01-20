@@ -142,12 +142,12 @@ DECLARE
 BEGIN
     SELECT EXISTS(SELECT 1 FROM providers WHERE prod_name = p_prod_name) INTO do_exists;
 
-    IF NOT do_exists THEN
+    IF do_exists THEN
         RAISE NOTICE 'Provider with contact "%" already exists.', p_contact;
         RETURN;
     END IF;
 
-    SELECT tools.new_address(p_address) INTO address_id;
+    SELECT utils.new_address_alt(p_address) INTO address_id;
 
     INSERT INTO providers (prod_name, contact, address)
     VALUES (p_prod_name, p_contact, address_id);

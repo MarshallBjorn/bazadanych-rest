@@ -297,7 +297,7 @@ body {
 }
 
 /* Dish Add */
-#dish-add {
+#dish-add, #component_add, #addition_add, #provider_add {
     padding: 20px;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -307,7 +307,10 @@ body {
 }
 
 #dish-add form,
-#new-order form {
+#new-order form,
+#component_add form,
+#addition_add form,
+#provider_add form {
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -317,7 +320,10 @@ body {
 #dish-add form textarea,
 #add-staff-form input,
 #new-order form input,
-#new-order form textarea {
+#new-order form textarea,
+#component_add form input,
+#addition_add input,
+#provider_add input {
     width: 100%;
     max-width: 500px;
     padding: 10px;
@@ -326,7 +332,10 @@ body {
     border-radius: 4px;
 }
 
-#new-order select {
+#new-order select,
+#component_add select,
+#addition_add select,
+#provider_add select {
     width: 100%;
     max-width: 500px;
     padding: 8px;
@@ -339,7 +348,10 @@ body {
 
 #dish-add form button,
 #add-staff-form button,
-#new-order form button {
+#new-order form button,
+#component_add button,
+#addition_add button,
+#provider_add button {
     align-self: flex-start;
     padding: 10px 20px;
     font-size: 16px;
@@ -353,7 +365,10 @@ body {
 
 #dish-add form button:hover,
 #add-staff-form button:hover,
-#new-order button:hover {
+#new-order button:hover,
+#component_add button:hover,
+#addition_add button:hover,
+#provider_add button:hover {
     background-color: #0056b3;
 }
 
