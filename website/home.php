@@ -31,10 +31,10 @@
                     <p>Zalogowany: <strong><?php echo $_SESSION['logged'];?></strong></p>
                 </div>
                 <div id="line"></div>
-                <button type="button" onclick="changeView('new-order')" class="menu">Nowe zamówienie</button>
-                <button type="button" onclick="changeView('order-list')" class="menu">Aktualne zamówienia</button>
-                <button type="button" onclick="changeView('dish-add')" class="menu">Nowe danie</button>
+                <button type="button" onclick="changeView('order-list')" class="menu">Zamówienia</button>
                 <button type="button" onclick="changeView('item-list')" class="menu">Lista dań</button>
+                <button type="button" onclick="changeView('new-order')" class="menu">Nowe zamówienie</button>
+                <button type="button" onclick="changeView('dish-add')" class="menu">Nowe danie</button>
                 <button type="button" onclick="changeView('employee-list')" class="menu">Pracownicy</button>
                 <button type="button" onclick="logout()" class="menu">Wyloguj</button>
                 <div id="date-div">
@@ -97,9 +97,11 @@
                     $query = "SELECT * FROM display.list_all_dishes() AS t(dish_id INT, dish_name VARCHAR, dish_type VARCHAR, price NUMERIC, is_served boolean, description TEXT)";
                     $query2 = "SELECT * FROM display.list_all_additions() AS t(addition_id INT, addition_name VARCHAR, price NUMERIC, prod_name VARCHAR, availability boolean)";
                     $query3 = "SELECT * FROM display.list_all_components() AS t(component_id INT, component_name VARCHAR, price NUMERIC, prod_name VARCHAR, availability boolean)";
+                    $query4 = "SELECT * FROM display.list_providers() AS t(prod_id INT, prod_name VARCHAR, contact VARCHAR, addr TEXT, is_partner BOOLEAN);";
                     $result = pg_query($db, $query);
                     $result2 = pg_query($db, $query2);
                     $result3 = pg_query($db, $query3);
+                    $result4 = pg_query($db, $query4);
 
                     if(!$result || !$result2) {
                         echo "Wystąpił błąd podczas przetwarzania żądania" . pg_last_error($db);
@@ -169,7 +171,7 @@
                         echo "</div>";
                     }
 
-                    echo "<h2>Składniki</h2>";
+                    echo "<h2>Wszystkie składniki</h2>";
                     while($row = pg_fetch_assoc($result3)) {
                         echo "<div class='item'>";
                         echo "<p class='item-element'><strong>ID:</strong> {$row['component_id']}</p>";
@@ -196,6 +198,18 @@
                         echo "<button type='submit'>Zapisz</button>";
                         echo "</form>";
                         echo "</div>";
+                        echo "</div>";
+                    }
+
+                    echo "<h2>Wszystkie producenci</h2>";
+                    while($row = pg_fetch_assoc($result4)) {
+                        echo "<div class='item'>";
+                        echo "<p class='item-element'><strong>ID:</strong> $row[prod_id]</p>" . 
+                            "<p class='item-element'><strong>Nazwa:</strong> $row[prod_name]</p>" .
+                            "<p class='item-element'><strong>Kontakt:</strong> $row[contact]</p>" .
+                            "<p class='item-element'><strong>Adres:</strong> $row[addr]</p>" .
+                            "<p class='item-element'><strong>Partner:</strong> " . ($row['is_partner'] == 't' ? 'Tak' : 'Nie') ."</p>";
+                        echo "<button type=button onclick='toggleEditSection(this)'>Edytuj</button>";
                         echo "</div>";
                     }
                     ?>

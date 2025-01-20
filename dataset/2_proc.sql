@@ -3,8 +3,8 @@ CREATE OR REPLACE PROCEDURE tools.add_new_dish(
     p_dish_type varchar,
     p_price decimal(6,2),
     p_description text,
-    p_components jsonb DEFAULT '[]'::jsonb,  -- List of components with quantity
-    p_additions jsonb DEFAULT '[]'::jsonb     -- List of additions
+    p_components jsonb DEFAULT '[]'::jsonb, 
+    p_additions jsonb DEFAULT '[]'::jsonb
 )
 LANGUAGE plpgsql
 AS
@@ -18,24 +18,19 @@ DECLARE
 	do_exists boolean;
 BEGIN
     SELECT utils.item_exist(p_dish_name,'DISH') INTO do_exists;
-    -- SELECT EXISTS(SELECT 1 FROM dishes WHERE dish_name = p_dish_name AND dish_type = p_dish_type) INTO do_exists;
 
     IF do_exists THEN
         RAISE NOTICE 'Dish "%" already exists.', p_dish_name;
         RETURN;
     END IF;
 
-    -- Insert new dish into dishes table
     INSERT INTO dishes (dish_name, dish_type, price, description)
     VALUES (p_dish_name, p_dish_type, p_price, p_description)
     RETURNING dish_id INTO new_dish_id;
     CALL tools.item_soft_toggle(p_dish_name, 'DISH');
 
-    -- Insert components if any are provided
     IF p_components IS NOT NULL AND jsonb_array_length(p_components) > 0 THEN
-        -- Loop through each component and insert it into the dishes_components table
         FOR component IN SELECT * FROM jsonb_array_elements(p_components) LOOP
-            -- Extract the component_id and quantity from each JSON element
             current_item := component->>'name';
             quantity := (component->>'quantity')::int;
 
@@ -145,7 +140,6 @@ DECLARE
     address_id int;
     do_exists boolean;
 BEGIN
-    -- Check if the provider already exists based on contact
     SELECT EXISTS(SELECT 1 FROM providers WHERE prod_name = p_prod_name) INTO do_exists;
 
     IF NOT do_exists THEN
@@ -153,10 +147,8 @@ BEGIN
         RETURN;
     END IF;
 
-    -- Add or retrieve the address ID
     SELECT tools.new_address(p_address) INTO address_id;
 
-    -- Insert the new provider
     INSERT INTO providers (prod_name, contact, address)
     VALUES (p_prod_name, p_contact, address_id);
 
@@ -183,7 +175,6 @@ BEGIN
 
     current_prod_id := utils.find_item(p_provider_name, 'PROVIDER');
     
-    -- Check if the component already exists
     SELECT EXISTS(SELECT 1 FROM components WHERE component_name = p_component_name) INTO do_exists;
     
     IF do_exists THEN
@@ -191,7 +182,6 @@ BEGIN
         RETURN;
     END IF;
 
-    -- Insert the new component
     INSERT INTO components (component_name, prod_id, price, availability)
     VALUES (p_component_name, current_prod_id, p_price, p_availability);
 
@@ -212,14 +202,12 @@ DECLARE
     provider_id int;
     do_exists boolean;
 BEGIN
-    -- Retrieve the provider ID based on contact
     SELECT prod_id INTO provider_id FROM providers WHERE prod_name = p_provider_name;
 
     IF provider_id IS NULL THEN
         RAISE EXCEPTION 'Provider with contact "%" not found.', p_provider_contact;
     END IF;
 
-    -- Check if the addition already exists
     SELECT EXISTS(SELECT 1 FROM additions WHERE addition_name = p_addition_name) INTO do_exists;
 
     IF do_exists THEN
@@ -227,7 +215,6 @@ BEGIN
         RETURN;
     END IF;
 
-    -- Insert the new addition
     INSERT INTO additions (addition_name, provider, price, availability)
     VALUES (p_addition_name, provider_id, p_price, p_availability);
 
@@ -252,7 +239,6 @@ DECLARE
     address_id int;
     do_exists boolean;
 BEGIN
-    -- Check if the staff member already exists based on PESEL
     SELECT EXISTS(SELECT 1 FROM staff WHERE pesel = p_pesel) INTO do_exists;
 
     IF do_exists THEN
@@ -260,7 +246,6 @@ BEGIN
         RETURN;
     END IF;
 
-    -- Check if the contact is unique
     SELECT EXISTS(SELECT 1 FROM staff WHERE contact = p_contact) INTO do_exists;
 
     IF do_exists THEN
@@ -268,48 +253,14 @@ BEGIN
         RETURN;
     END IF;
 
-    -- Add or retrieve the address ID
     SELECT tools.new_address(p_address) INTO address_id;
 
-    -- Insert the new staff member
     INSERT INTO staff (pesel, firstname, lastname, position, address, contact, gender, birthday)
     VALUES (p_pesel, p_firstname, p_lastname, p_position, address_id, p_contact, p_gender, p_birthday);
 
     RAISE NOTICE 'Staff member "%" added successfully.', p_firstname || ' ' || p_lastname;
 END;
 $$;
-
-/*
-CREATE OR REPLACE PROCEDURE tools.remove_dish_hard (
-    p_dish_name varchar,
-    p_dish_type varchar
-)
-LANGUAGE plpgsql
-AS
-$$
-DECLARE
-    do_exists boolean;
-    dish_number int;
-BEGIN
-    SELECT EXISTS(SELECT 1 FROM dishes WHERE dish_name = p_dish_name AND dish_type = p_dish_type) INTO do_exists;
-
-    IF NOT do_exists THEN
-        RAISE EXCEPTION 'Dish "%" of the "%" type, does not exist.', p_dish_name, p_dish_type;
-        RETURN;
-    END IF;
-
-    SELECT dish_id INTO dish_number
-    FROM dishes
-    WHERE dish_name = p_dish_name AND dish_type = p_dish_type;
-
-    DELETE FROM dishes_components WHERE dish_number = dish_id;
-    DELETE FROM dishes_additions WHERE dish_number = dish_id;
-    DELETE FROM dishes WHERE dish_id = dish_number;
-
-    RAISE NOTICE 'Dish "%" if the "%" type deleted successfuly.', p_dish_name, p_dish_type;
-END;
-$$;
-*/
 
 CREATE OR REPLACE PROCEDURE tools.item_soft_toggle (
     p_name varchar,

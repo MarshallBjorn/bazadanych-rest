@@ -177,7 +177,6 @@ BEGIN
     LOOP
         FETCH curs INTO result_record;
         EXIT WHEN NOT FOUND;
-        -- Zwrócenie danych z typami zgodnymi z oczekiwaniami (text)
         RETURN NEXT (result_record.order_id, result_record.dish_name::text, result_record.quantity);
     END LOOP;
     CLOSE curs;
@@ -201,11 +200,28 @@ BEGIN
     LOOP
         FETCH curs INTO result_record;
         EXIT WHEN NOT FOUND;
-        -- Zwrócenie danych z typami zgodnymi z oczekiwaniami (text)
         RETURN NEXT (result_record.order_id, result_record.addition_name::text, result_record.quantity);
     END LOOP;
     CLOSE curs;
     RETURN;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION display.list_providers()
+RETURNS SETOF RECORD AS
+$$
+DECLARE
+    curs CURSOR FOR
+        SELECT prod_id, prod_name, contact, utils.parse_address("address") AS addr, is_partner
+        FROM providers;
+    result_record RECORD;
+BEGIN
+    OPEN curs;
+    LOOP
+        FETCH curs INTO result_record;
+        EXIT WHEN NOT FOUND;
+        RETURN NEXT (result_record.prod_id, result_record.prod_name, result_record.contact, result_record.addr, result_record.is_partner);
+    END LOOP;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -265,32 +281,27 @@ DECLARE
     in_post_code varchar;
     in_building_num varchar;
 BEGIN
-    -- Sprawdzamy, czy obiekt zawiera wymagane pola
     in_street := p_address->>'street';
     in_locality := p_address->>'locality';
     in_post_code := p_address->>'post_code';
     in_building_num := p_address->>'building_num';
 
-    -- Sprawdzamy, czy wszystkie wymagane dane są obecne
     IF in_street IS NULL OR in_locality IS NULL OR in_post_code IS NULL OR in_building_num IS NULL THEN
         RAISE EXCEPTION 'Adress is incorrect. Missing required fields.';
     END IF;
 
-    -- Szukamy istniejącego adresu w bazie danych
     SELECT address_id INTO address_number FROM addresses
     WHERE street = in_street 
       AND locality = in_locality 
       AND post_code = in_post_code 
       AND building_num = in_building_num; 
 
-    -- Jeśli adres nie istnieje, dodajemy nowy
     IF address_number IS NULL THEN
         INSERT INTO addresses(street, locality, post_code, building_num)
         VALUES (in_street, in_locality, in_post_code, in_building_num)
         RETURNING address_id INTO address_number;
     END IF;
 
-    -- Zwracamy identyfikator adresu
     RETURN address_number;
 END;
 $$ LANGUAGE plpgsql;
@@ -301,18 +312,15 @@ $$
 DECLARE
     selected_deliverer varchar;
 BEGIN
-    -- Find an available deliverer with fewer than 3 active orders
     SELECT pesel INTO selected_deliverer
     FROM deliverers
     WHERE (SELECT COUNT(*) FROM orders WHERE deliverer = deliverers.pesel AND order_status = 2) < 3
     LIMIT 1;
 
-    -- If no deliverer is available, raise an exception
     IF selected_deliverer IS NULL THEN
         RAISE EXCEPTION 'No available deliverers to assign to order %', p_order_id;
     END IF;
 
-    -- Update the order to assign the selected deliverer
     UPDATE orders
     SET deliverer = selected_deliverer
     WHERE order_id = p_order_id;
@@ -371,21 +379,18 @@ RETURNS BOOLEAN AS $$
 DECLARE
     stored_hash TEXT;
 BEGIN
-    -- Fetch the hashed password for the given username
     SELECT password_hash INTO stored_hash
     FROM auth.users
     WHERE username = username_input;
 
-    -- If no user found, return FALSE
     IF NOT FOUND THEN
         RETURN FALSE;
     END IF;
 
-    -- Verify the provided password against the stored hash
     IF crypt(password_input, stored_hash) = stored_hash THEN
-        RETURN TRUE; -- Login successful
+        RETURN TRUE;
     ELSE
-        RETURN FALSE; -- Login failed
+        RETURN FALSE;
     END IF;
 END;
 $$ LANGUAGE plpgsql;

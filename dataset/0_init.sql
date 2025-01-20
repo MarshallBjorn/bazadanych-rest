@@ -11,7 +11,7 @@ CREATE TABLE "providers" (
     "prod_name" varchar(20) NOT NULL,
     "contact" varchar(11) UNIQUE NOT NULL,
     "address" int UNIQUE NOT NULL,
-    "is_partner" boolean DEFAULT FALSE,
+    "is_partner" boolean DEFAULT TRUE,
     FOREIGN KEY ("address") REFERENCES "addresses"("address_id") ON DELETE CASCADE
 );
 

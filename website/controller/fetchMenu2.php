@@ -11,7 +11,7 @@ $type = $_GET['type'] ?? null;
 
 if ($type === 'components') {
     $query = "SELECT component_id, component_name, price 
-              FROM components
+              FROM display.list_all_components() AS t(component_id INT, component_name VARCHAR, price NUMERIC, prod_name VARCHAR, availability BOOLEAN) 
               WHERE availability = TRUE";
 }
 
