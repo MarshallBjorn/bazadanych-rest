@@ -12,11 +12,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $prod_id = $_POST['prod_id'];
     $prod_name = $_POST['prod_name'];
     $contact = $_POST['contact'];
-    $adres = $_POST['addr'];
     $partner = $_POST['partner'];
+    $address = json_encode([
+        $_POST['street'],
+        $_POST['locality'],
+        $_POST['post_code'],
+        $_POST['building_num']
+    ]);
 
-    $query = "CALL tools.update_provider($1, $2, $3, $4, $5)";
-    $params = [$prod_id, $prod_name, $contact, $adres, $partner];
+    $query = "CALL tools.update_provider($1, $2, $3, $4::jsonb, $5)";
+    $params = [$prod_id, $prod_name, $contact, $address, $partner];
 
     $result = pg_query_params($db, $query, $params);
 

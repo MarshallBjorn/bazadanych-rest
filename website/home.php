@@ -97,7 +97,7 @@
                     $query = "SELECT * FROM display.list_all_dishes() AS t(dish_id INT, dish_name VARCHAR, dish_type VARCHAR, price NUMERIC, is_served boolean, description TEXT)";
                     $query2 = "SELECT * FROM display.list_all_additions() AS t(addition_id INT, addition_name VARCHAR, price NUMERIC, prod_name VARCHAR, availability boolean)";
                     $query3 = "SELECT * FROM display.list_all_components() AS t(component_id INT, component_name VARCHAR, price NUMERIC, prod_name VARCHAR, availability boolean)";
-                    $query4 = "SELECT * FROM display.list_providers() AS t(prod_id INT, prod_name VARCHAR, contact VARCHAR, addr TEXT, is_partner BOOLEAN);";
+                    $query4 = "SELECT * FROM display.list_providers() AS t(prod_id INT, prod_name VARCHAR, contact VARCHAR, addr TEXT, street VARCHAR, locality VARCHAR, post_code VARCHAR, building_num VARCHAR, is_partner BOOLEAN);";
                     $result = pg_query($db, $query);
                     $result2 = pg_query($db, $query2);
                     $result3 = pg_query($db, $query3);
@@ -218,8 +218,14 @@
                         echo "<input type='text' id='edit-name' name='prod_name' value='{$row['prod_name']}' required />";
                         echo "<label for='edit-price'>Kontakt:</label>";
                         echo "<input type='text' id='edit-type' name='contact' value='{$row['contact']}' required />";
-                        echo "<label for='edit-type'>Adres:</label>";
-                        echo "<input type='text' id='edit-served' name='adres' value='{$row['addr']}'/>";
+                        echo "<label for='edit-type'>Ulica:</label>";
+                        echo "<input type='text' id='edit-served' name='street' value='{$row['street']}'/>";
+                        echo "<label for='edit-type'>Miejscowosc:</label>";
+                        echo "<input type='text' id='edit-served' name='locality' value='{$row['locality']}'/>";
+                        echo "<label for='edit-type'>Kod pocztowy:</label>";
+                        echo "<input type='text' id='edit-served' name='post_code' value='{$row['post_code']}'/>";
+                        echo "<label for='edit-type'>Numer budynku:</label>";
+                        echo "<input type='text' id='edit-served' name='building_num' value='{$row['building_num']}'/>";
                         echo "<label for='edit-name'>Partner:</label>";
                         echo "<select id='edit-served' name='partner'>";
                         echo "<option value='t'" . ($row['availability'] == 't' ? ' selected' : '') . ">Tak</option>";

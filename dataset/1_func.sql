@@ -212,15 +212,17 @@ RETURNS SETOF RECORD AS
 $$
 DECLARE
     curs CURSOR FOR
-        SELECT prod_id, prod_name, contact, utils.parse_address("address") AS addr, is_partner
-        FROM providers;
+        SELECT prod_id, prod_name, contact, utils.parse_address("address") AS addr, addresses.street, addresses.locality, addresses.post_code, addresses.building_num, is_partner
+        FROM providers
+        INNER JOIN addresses ON
+        addresses.address_id = providers.address;
     result_record RECORD;
 BEGIN
     OPEN curs;
     LOOP
         FETCH curs INTO result_record;
         EXIT WHEN NOT FOUND;
-        RETURN NEXT (result_record.prod_id, result_record.prod_name, result_record.contact, result_record.addr, result_record.is_partner);
+        RETURN NEXT (result_record.prod_id, result_record.prod_name, result_record.contact, result_record.addr, result_record.street, result_record.locality, result_record.post_code, result_record.building_num, result_record.is_partner);
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
