@@ -7,6 +7,8 @@ body {
     padding: 0;
     background-color: #f4f4f9;
     color: #333;
+    height: 100%;
+    overflow: hidden;
 }
 
 /* Login Page */
@@ -72,7 +74,7 @@ body {
 #app {
     display: flex;
     flex-direction: row;
-    min-height: 100vh;
+    height: 100%;
     border: 1px solid #ddd;
     background-color: #fff;
 }
@@ -86,6 +88,7 @@ body {
     border-right: 1px solid #ddd;
     padding: 15px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
 }
 
 #side-panel button {
@@ -147,7 +150,9 @@ body {
 /* Content */
 #content {
     flex-grow: 1;
-    padding: 20px;
+    overflow-y: auto;
+    padding: 15px;
+    background-color: #fff;
 }
 
 /* New order*/
