@@ -201,7 +201,7 @@
                         echo "</div>";
                     }
 
-                    echo "<h2>Wszystkie producenci</h2>";
+                    echo "<h2>Wszyscy producenci</h2>";
                     while($row = pg_fetch_assoc($result4)) {
                         echo "<div class='item'>";
                         echo "<p class='item-element'><strong>ID:</strong> $row[prod_id]</p>" . 
@@ -311,6 +311,17 @@
                         echo "<input type='text' id='edit-position' name='fposition' value='{$row['fposition']}' required />";
                         echo "<label for='edit-contact'>Telefon:</label>";
                         echo "<input type='text' id='edit-contact' name='fcontact' value='{$row['fcontact']}' required />";
+
+                        echo "<label for='edit-street'>Ulica:";
+                        echo "<input type='text' id='edit-contact' name='street' value='{$row['street']}' required />";
+                        echo "<label for='edit-locality'>Miejscowosc:";
+                        echo "<input type='text' id='edit-contact' name='locality' value='{$row['locality']}' required />";
+                        echo "<label for='edit-post-code'>Kod pocztowy:";
+                        echo "<input type='text' id='edit-post-code' name='post_code' value='{$row['post_code']}' required />";
+                        echo "<label for='edit-build-num'>Numer domu:";
+                        echo "<input type='text' id='edit-build-num' name='building_num' value='{$row['building_num']}' required />";
+
+
                         echo "<label for='edit-gender'>Płeć:</label>";
                         echo "<select id='edit-gender' name='fgender'>";
                         echo "<option value='t'" . ($row['fgender'] == 'M' ? ' selected' : '') . ">Mężczyzna</option>";

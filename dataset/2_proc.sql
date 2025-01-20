@@ -253,7 +253,7 @@ BEGIN
         RETURN;
     END IF;
 
-    SELECT tools.new_address(p_address) INTO address_id;
+    SELECT utils.new_address_alt(p_address) INTO address_id;
 
     INSERT INTO staff (pesel, firstname, lastname, position, address, contact, gender, birthday)
     VALUES (p_pesel, p_firstname, p_lastname, p_position, address_id, p_contact, p_gender, p_birthday);
@@ -323,12 +323,15 @@ CREATE OR REPLACE PROCEDURE tools.update_staff(
     p_contact varchar,
     p_gender boolean,
     p_birthday date,
-    p_status text
+    p_status text,
+    p_address jsonb
 ) LANGUAGE plpgsql AS $$
 DECLARE
+    address_number int;
     staff_id varchar;
 BEGIN
     staff_id := utils.find_item_alt(p_pesel);
+    address_number := utils.new_address_alt(p_address);
     UPDATE staff SET
     firstname = p_new_firstname,
     lastname = p_new_lastname,
@@ -336,7 +339,8 @@ BEGIN
     contact = p_contact,
     gender = p_gender,
     birthday = p_birthday,
-    "status" = p_status
+    "status" = p_status,
+    "address" = address_number
     WHERE pesel = staff_id;
     RAISE NOTICE 'Person info has been updated.';
 END;

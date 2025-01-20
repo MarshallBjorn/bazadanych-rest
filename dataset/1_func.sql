@@ -251,7 +251,7 @@ $$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION display.list_staff()
-RETURNS TABLE (staff_id varchar, fname varchar, lname varchar, fposition varchar, fcontact varchar, faddress text, fgender boolean, fbirthday date, fhire_date date, fstatus text) AS
+RETURNS TABLE (staff_id varchar, fname varchar, lname varchar, fposition varchar, fcontact varchar, street varchar, locality varchar, post_code varchar, building_num varchar, faddress text, fgender boolean, fbirthday date, fhire_date date, fstatus text) AS
 $$
 BEGIN
     RETURN QUERY
@@ -261,12 +261,18 @@ BEGIN
         lastname AS lname,
         position AS fposition,
         contact AS fcontact,
+        addresses.street AS street,
+        addresses.locality AS locality,
+        addresses.post_code AS post_code,
+        addresses.building_num AS building_num,
         utils.parse_address("address") AS faddress,
         gender AS fgender,
         birthday AS fbirthday,
         hire_date AS fhire_date,
         "status" AS fstatus
-    FROM staff;
+    FROM staff
+    INNER JOIN addresses ON
+    addresses.address_id = staff.address;
 END;
 $$
 LANGUAGE plpgsql;
@@ -284,7 +290,42 @@ BEGIN
     in_street := p_address->>'street';
     in_locality := p_address->>'locality';
     in_post_code := p_address->>'post_code';
-    in_building_num := p_address->>'building_num';
+    in_building_num := p_address->>'building_num'::varchar;
+
+    IF in_street IS NULL OR in_locality IS NULL OR in_post_code IS NULL OR in_building_num IS NULL THEN
+        RAISE EXCEPTION 'Adress is incorrect. Missing required fields.';
+    END IF;
+
+    SELECT address_id INTO address_number FROM addresses
+    WHERE street = in_street 
+      AND locality = in_locality 
+      AND post_code = in_post_code 
+      AND building_num = in_building_num; 
+
+    IF address_number IS NULL THEN
+        INSERT INTO addresses(street, locality, post_code, building_num)
+        VALUES (in_street, in_locality, in_post_code, in_building_num)
+        RETURNING address_id INTO address_number;
+    END IF;
+
+    RETURN address_number;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION utils.new_address_alt(p_address jsonb DEFAULT '{}'::jsonb)
+RETURNS int AS
+$$
+DECLARE
+    address_number int;
+    in_street varchar;
+    in_locality varchar;
+    in_post_code varchar;
+    in_building_num varchar;
+BEGIN
+    in_street := p_address->>0;
+    in_locality := p_address->>1;
+    in_post_code := p_address->>2;
+    in_building_num := p_address->>3;
 
     IF in_street IS NULL OR in_locality IS NULL OR in_post_code IS NULL OR in_building_num IS NULL THEN
         RAISE EXCEPTION 'Adress is incorrect. Missing required fields.';

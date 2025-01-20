@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION['logged'])) {
-    header(header: "Location:index.html");
+    header("Location:index.html");
     exit;
 }
 
@@ -19,18 +19,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $gender = $_POST['fgender'];
     $birthday = $_POST['fbirthday'];
     $status = $_POST['fstatus'];
+    $address = json_encode([
+        $_POST['street'],
+        $_POST['locality'],
+        $_POST['post_code'],
+        $_POST['building_num']
+    ]);
 
-    $query = "CALL tools.update_staff($1,$2,$3,$4,$5,$6,$7,$8)";
+    $query = "CALL tools.update_staff($1::varchar, $2::varchar, $3::varchar, $4::varchar, $5::varchar, $6::boolean, $7::date, $8::text, $9::jsonb)";
     $result = pg_query_params($db, $query, [
-        $pesel, $firstname, $lastname, $position, $contact, $gender, $birthday, $status
+        $pesel, $firstname, $lastname, $position, $contact, $gender, $birthday, $status, $address
     ]);
 
     if ($result) {
         $_SESSION['message'] = "Pracownik został pomyślnie zaktualizowany.";
-        header(header: "Location: ../home.php");
     } else {
         $_SESSION['message'] = "Błąd podczas aktualizacji: " . pg_last_error($db);
-        header(header: "Location: ../home.php");
     }
+    header("Location: ../home.php");
 }
 ?>
