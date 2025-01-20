@@ -32,7 +32,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./containers-data/mongodb:/data/db
+      - ./mongoDB/containers-data/mongodb:/data/db
 
   php-apache:
     build: .
