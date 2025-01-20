@@ -181,7 +181,7 @@
                             "<p class='item-element'><strong>Dostępne:</strong> ". ($row['availability'] == 't' ? 'Tak' : 'Nie') ."</p>";
                         echo "<button type=button onclick='toggleEditSection(this)'> Edytuj </button>";
                         
-                        echo "<div class='edit-section'";
+                        echo "<div class='edit-section'>";
                         echo "<form method='POST' action='./controller/editComponentHandler.php'>";
                         echo "<input type='hidden' id='edit-name' name='component_id' value='{$row['component_id']}'/>";
                         echo "<label for='edit-name'>Nazwa:</label>";
@@ -210,6 +210,24 @@
                             "<p class='item-element'><strong>Adres:</strong> $row[addr]</p>" .
                             "<p class='item-element'><strong>Partner:</strong> " . ($row['is_partner'] == 't' ? 'Tak' : 'Nie') ."</p>";
                         echo "<button type=button onclick='toggleEditSection(this)'>Edytuj</button>";
+
+                        echo "<div class='edit-section'>";
+                        echo "<form method='POST' action='./controller/editProviderHandler.php'>";
+                        echo "<input type='hidden' id='edit-name' name='prod_id' value='{$row['prod_id']}'/>";
+                        echo "<label for='edit-name'>Nazwa:</label>";
+                        echo "<input type='text' id='edit-name' name='prod_name' value='{$row['prod_name']}' required />";
+                        echo "<label for='edit-price'>Kontakt:</label>";
+                        echo "<input type='text' id='edit-type' name='contact' value='{$row['contact']}' required />";
+                        echo "<label for='edit-type'>Adres:</label>";
+                        echo "<input type='text' id='edit-served' name='adres' value='{$row['addr']}'/>";
+                        echo "<label for='edit-name'>Partner:</label>";
+                        echo "<select id='edit-served' name='partner'>";
+                        echo "<option value='t'" . ($row['availability'] == 't' ? ' selected' : '') . ">Tak</option>";
+                        echo "<option value='f'" . ($row['availability'] == 'f' ? ' selected' : '') . ">Nie</option>";
+                        echo "</select>";
+                        echo "<button type='submit'>Zapisz</button>";
+                        echo "</form>";
+                        echo "</div>";
                         echo "</div>";
                     }
                     ?>
