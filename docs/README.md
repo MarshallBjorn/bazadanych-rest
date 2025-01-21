@@ -2,17 +2,17 @@
 ## Dane do logowania
 ### pgAdmin:
 **Adres:** ``localhost:8080``
-**Login:** admin@example.com
-**Hasło:** admin
+**Login:** ``admin@example.com``
+**Hasło:** ``admin``
 ### Baza danych:
-**Login:** admin
-**Hasło:** password
+**Login:** ``admin``
+**Hasło:** ``password``
 ### Aplikacja internetowa:
 **Adres:** ```localhost:8000```
-**Login:** admin
-**Hasło:** 1234
-### MongoDB:
 **Login:** ``admin``
+**Hasło:** ``1234``
+### MongoDB:
+**Login:** ``root``
 **Hasło:** ``example``
 
 ## Instrukcja inicjalizacji i użytkowania.
@@ -50,8 +50,31 @@ Jak nie pojawi się błędów w bazie danych, po zalogowaniu do systemu dostępn
 ### Zatrzymanie aplikacji
 W celu zatrzymania i wyłączenia aplikacji wystarczy w sesji terminalu(która była użyta do uruchomienia wcześniej) wcisnąć kombinację ``Ctrl + C``, albo alternatywnie ``docker compose down``[^2].
 
-### Konfiguracja MongoDB
+### Instalacja i konfiguracja MongoDB
+Dla dostępu do nierelacyjnej bazy danych MongoDB utworzoną w ramach tego projetku, niezbędne jest instalacja tych oficjalnych oprogramowań:
+* **Mongosh** - powłoka która pozwala na zarządzanie i wyświetlanie zawartości bazy dannych. [Link do mongosh](https://www.mongodb.com/try/download/shell).
+* **MongoDB Database Tools** - narzędzia dla MongoDB. [Link do instalatora](https://www.mongodb.com/try/download/database-tools). Po zainstalowaniu narzędzia nie są dodawane w PATH, ale można je jednorazowo dodać. Dla systemu Windows:
+```
+set %PATH%=%PATH%;C:\Ścieżka\Do\Narzędzi
+```
 
+Po instalacji tego oprogramowania należy wykonać kroki zaimportowania kolekcji poleceniem ``mongoimport`` wytłumaczone w dokumencie "MongoDB_migration_doc". Niezbędny do tego plik ``.json`` jest już wygenerowany(ale można go stworzyć ponownie usuwając go i uruchamiając program ``extractor.py``).
+
+Po wykonaniu instrukcji ze wspomnianiego dokumentu, można zalogować się do bazy poleceniem:
+```
+mongosh mongodb://root:example@localhost:27017
+```
+A następnie wyświetlić wpisując po kolei:
+```
+use mydb
+```
+```
+db.dishes.find().pretty()
+```
+Dla wyjścia wystarczy wpisać:
+```
+quit
+```
 [^1]: ```init.*``` to jest skrypt w powłoce shell/cmd który usuwa (jeśli przed tym była inicjalizowana) bazę danych i tworzy ją ponownie na podstawie plików w katalogu ```dataset```. Natomiast ```start.*``` poprostu uruchamia stworzone wcześniej kontenery.
 [^2]: ``docker compose down`` usuwa wszystkie stworzone kontenery wraz z tym: pgAdmina. Skrypty ``init.*`` usuwają jedynie kontener PostgreSQL, a pozostałe zostają w wcześniej ustalonej konfiguracji.
 
