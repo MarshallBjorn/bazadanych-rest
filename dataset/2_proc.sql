@@ -43,22 +43,6 @@ BEGIN
             END IF;
         END LOOP;
     END IF;
-
-    IF p_additions IS NOT NULL AND jsonb_array_length(p_additions) > 0 THEN
-        FOR addition IN SELECT * FROM jsonb_array_elements(p_additions) LOOP
-			current_item := (addition->>'id')::int;
-
-			SELECT EXISTS(SELECT 1 FROM additions WHERE addition_id = current_item) INTO do_exists;
-
-			IF do_exists THEN 
-            	INSERT INTO dishes_additions (dish_id, addition_id)
-            	VALUES (new_dish_id, current_item);
-			ELSE
-				RAISE EXCEPTION 'Addition no:% does not exist.', current_item;
-				RETURN;
-			END IF;
-        END LOOP;
-    END IF;
 END;
 $$;
 
@@ -412,42 +396,5 @@ BEGIN
     is_partner = p_status
     WHERE p_provider_id = prod_id;
     RAISE NOTICE 'Provider has been updated.';
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE tools.update_dishes_components(dish_id_input INT, components_json JSONB)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    DELETE FROM dishes_components
-    WHERE dish_id = dish_id_input;
-
-    INSERT INTO dishes_components (dish_id, component_id, quantity)
-    SELECT 
-        dish_id_input AS dish_id,
-        (component->>'component_id')::INT AS component_id,
-        (component->>'quantity')::INT AS quantity
-    FROM 
-        JSONB_ARRAY_ELEMENTS(components_json) AS component;
-
-    IF NOT EXISTS (SELECT 1 FROM dishes WHERE dish_id = dish_id_input) THEN
-        RAISE EXCEPTION 'Dish with id % does not exist', dish_id_input;
-    END IF;
-
-    IF EXISTS (SELECT 1 FROM dishes_components WHERE quantity < 0) THEN
-        RAISE EXCEPTION 'Negative quantities are not allowed';
-    END IF;
-END;
-$$;
-
-CREATE OR REPLACE PROCEDURE tools.cancel_order(
-    p_order_id int
-)
-LANGUAGE plpgsql AS $$
-BEGIN
-    UPDATE orders
-    SET order_status = 4
-    WHERE p_order_id = order_id;
-    RAISE NOTICE 'Order % canceled', p_order_id;
 END;
 $$;

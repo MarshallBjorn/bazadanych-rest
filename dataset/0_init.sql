@@ -82,14 +82,6 @@ CREATE TABLE "additions" (
     FOREIGN KEY ("provider") REFERENCES "providers"("prod_id")
 );
 
-CREATE TABLE "dishes_additions" (
-    "addition_id" int,
-    "dish_id" int,
-    PRIMARY KEY("addition_id", "dish_id"),
-    FOREIGN KEY("addition_id") REFERENCES "additions"("addition_id"),
-    FOREIGN KEY("dish_id") REFERENCES "dishes"("dish_id")
-);
-
 CREATE TABLE "payment_methods" (
     "payment_method_id" SERIAL PRIMARY KEY,
     "method" varchar(20) NOT NULL
@@ -153,7 +145,6 @@ COPY components(component_name, prod_id, price, availability) FROM '/docker-entr
 COPY additions(addition_name, provider, price, availability) FROM '/docker-entrypoint-initdb.d/data/additions.csv' DELIMITER ';' CSV HEADER;
 COPY dishes(dish_name, dish_type, price, description) FROM '/docker-entrypoint-initdb.d/data/dishes.csv' DELIMITER ';' CSV HEADER;
 COPY dishes_components(dish_id, component_id, quantity) FROM '/docker-entrypoint-initdb.d/data/dishes_components.csv' DELIMITER ';' CSV HEADER;
-COPY dishes_additions(addition_id, dish_id) FROM '/docker-entrypoint-initdb.d/data/dishes_additions.csv' DELIMITER ';' CSV HEADER;
 COPY orders(payment_method,deliverer,order_status,ordered_at,last_status_update,client_contact,"address",note,summary) FROM '/docker-entrypoint-initdb.d/data/orders.csv' DELIMITER ',' CSV HEADER;
 COPY orders_dishes(order_id, dish_id, quantity) FROM '/docker-entrypoint-initdb.d/data/orders_dishes.csv' DELIMITER ',' CSV HEADER;
 COPY orders_additions(order_id, addition_id, quantity) FROM '/docker-entrypoint-initdb.d/data/orders_additions.csv' DELIMITER ',' CSV HEADER;
