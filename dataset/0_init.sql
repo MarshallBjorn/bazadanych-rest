@@ -43,7 +43,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 INSERT INTO auth.users(username, password_hash)
 VALUES ('admin', crypt('1234', gen_salt('bf')));
 INSERT INTO auth.users(username, password_hash)
-VALUES ('staff', crypt('uchiha123', gen_salt('bf')));
+VALUES ('staff', crypt('qwerty', gen_salt('bf')));
 
 CREATE TABLE "components" (
     "component_id" SERIAL PRIMARY KEY,
