@@ -41,7 +41,7 @@ CREATE TABLE auth.users (
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 INSERT INTO auth.users(username, password_hash)
-VALUES ('admin', crypt('2137', gen_salt('bf')));
+VALUES ('admin', crypt('1234', gen_salt('bf')));
 INSERT INTO auth.users(username, password_hash)
 VALUES ('staff', crypt('uchiha123', gen_salt('bf')));
 
