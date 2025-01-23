@@ -146,7 +146,7 @@
                         <input type="text" name="post_code" required />
                         <label>Numer budynku*</label>
                         <input type="text" name="building_num" required />
-                        <button type="submit">Dodaj składnik</button>
+                        <button type="submit">Dodaj producenta</button>
                     </form>
                 </div>
 

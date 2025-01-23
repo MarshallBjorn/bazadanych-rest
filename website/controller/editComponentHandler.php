@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $query = "CALL tools.update_component($1, $2, $3, $4, $5)";
     $params = [$component_id, $component_name, $price, $prod_name, $is_served];
 
-    $result = pg_query_params($db, $query, $params);
+    $result = @pg_query_params($db, $query, $params);
     
     if ($result) {
         $_SESSION['message'] = "Danie zostało pomyślnie zaktualizowane.";
