@@ -462,7 +462,6 @@ END;
 $$
 LANGUAGE plpgsql;
 
-
 CREATE OR REPLACE FUNCTION utils.update_last_status_update()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -471,8 +470,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER utils.trigger_update_last_status_update
+CREATE TRIGGER trigger_update_last_status_update
 BEFORE UPDATE ON orders
 FOR EACH ROW
 WHEN (OLD.order_status IS DISTINCT FROM NEW.order_status)
-EXECUTE FUNCTION update_last_status_update();
+EXECUTE FUNCTION utils.update_last_status_update();

@@ -19,7 +19,7 @@ if (!isset($data['order_id'])) {
 $order_id = intval($data['order_id']);
 
 $query = "SELECT tools.update_order_status($1)";
-$result = pg_query_params($db, $query, [$order_id]);
+$result = @pg_query_params($db, $query, [$order_id]);
 
 if ($result) {
     echo json_encode(['success' => true, 'message' => 'Status zamówienia został zaktualizowany.']);
