@@ -1,18 +1,20 @@
 ﻿# Restaurant management project
+**Grupa 3**<br/>
+**Oleksii Nawrocki, Dominik Dziadosz**
 ## Dane do logowania
 ### pgAdmin:
-**Adres:** ``localhost:8080``
-**Login:** ``admin@example.com``
+**Adres:** ``localhost:8080``<br/>
+**Login:** ``admin@example.com``<br/>
 **Hasło:** ``admin``
 ### Baza danych:
-**Login:** ``admin``
+**Login:** ``admin``<br/>
 **Hasło:** ``password``
 ### Aplikacja internetowa:
-**Adres:** ```localhost:8000```
-**Login:** ``admin``
+**Adres:** ```localhost:8000```<br/>
+**Login:** ``admin``<br/>
 **Hasło:** ``1234``
 ### MongoDB:
-**Login:** ``root``
+**Login:** ``root``<br/>
 **Hasło:** ``example``
 
 ## Instrukcja inicjalizacji i użytkowania.
