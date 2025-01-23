@@ -61,7 +61,7 @@ Dla dostępu do nierelacyjnej bazy danych MongoDB utworzoną w ramach tego proje
 set %PATH%=%PATH%;C:\Ścieżka\Do\Narzędzi
 ```
 
-Po instalacji tego oprogramowania należy wykonać kroki zaimportowania kolekcji poleceniem ``mongoimport`` wytłumaczone w dokumencie "MongoDB_migration_doc". Niezbędny do tego plik ``.json`` jest już wygenerowany(ale można go stworzyć ponownie usuwając go i uruchamiając program ``extractor.py``).
+Po instalacji tego oprogramowania należy wykonać kroki zaimportowania kolekcji poleceniem ``mongoimport`` wytłumaczone w dokumencie ["MongoDB_migration_doc"](https://github.com/MarshallBjorn/bazadanych-rest/blob/ae67f8178a8ee73cf1c105e0b2a6318a3eaa86e2/docs/MongoDB_migration_doc.md). Niezbędny do tego plik ``.json`` jest już wygenerowany(ale można go stworzyć ponownie usuwając go i uruchamiając program ``extractor.py``).
 
 Po wykonaniu instrukcji ze wspomnianiego dokumentu, można zalogować się do bazy poleceniem:
 ```
