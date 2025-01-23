@@ -1,6 +1,7 @@
 ﻿# Restaurant management project
 **Grupa 3**<br/>
-**Oleksii Nawrocki, Dominik Dziadosz**
+**Oleksii Nawrocki, Dominik Dziadosz**</br>
+[Dokumentacja](https://github.com/MarshallBjorn/bazadanych-rest/blob/12e632f68ed0150ff52ccbe56b10d7bc7cda9721/docs/BazaDanychRest_Doc.pdf)
 ## Dane do logowania
 ### pgAdmin:
 **Adres:** ``localhost:8080``<br/>
