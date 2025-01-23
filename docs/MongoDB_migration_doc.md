@@ -95,7 +95,7 @@ Kolekcja MongoDB: Scalamy z `order`.
 COPY addresses TO '/dataset/data/placeholder.csv' DELIMITER ',' CSV HEADER;
 ```
 ### Transformacja danych
-- Do tego posłuży name Python albo Node.js żeby zamienić CSV na MongoDB-kompatybilny JSON. Do przykładu użyję Python:
+- Do tego posłuży nam Python albo Node.js żeby zamienić CSV na MongoDB-kompatybilny JSON. Do przykładu użyję Python:
 ```
 import pandas as pd
 import json
@@ -107,10 +107,11 @@ json_data = df.to_dict(orient='records')
 with open('placeholder.json' 'w') as f:
 	json.dump(json_data, f, indent=4)
 ```
+Bardziej skomplikowany skrypt można znaleźć w "mongoDB/extractor.py" w którym się znajduję rozszerzenie tego programu na obsługę dokumentów zagnieżdżonych.
 ### Załadowanie danych
 - W tym celu używamy funkcjonalność MongoDB:
 ```
-mongoimport --uri "mongodb://localhost:27017" --db mydb --collection placeholder --file placeholder.json --jsonArray
+mongoimport --uri "mongodb://localhost:27017" --authenticationDatabase admin -u root -p example --db mydb --collection dishes --file .\mongoDB\dishes.json --jsonArray
 ```
 ## 4. Obserwacje
 ### 1. Design schematów
